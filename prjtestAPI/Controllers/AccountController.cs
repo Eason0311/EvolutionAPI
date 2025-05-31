@@ -1,0 +1,190 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using prjtestAPI.Constants;
+using prjtestAPI.Data;
+using prjtestAPI.Helpers;
+using prjtestAPI.Models;
+using prjtestAPI.Models.DTOs.Account;
+using prjtestAPI.Services.Interfaces;
+using System.Security.Claims;
+
+namespace prjtestAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AccountController : ControllerBase
+    {
+        private readonly TestApiContext _db;
+        private readonly IMailService _mailService;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IUserActionTokenService _tokenService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
+        private readonly IJwtService _jwtService;
+
+        public AccountController(
+            TestApiContext db,
+            IMailService mailService,
+            IPasswordHasher passwordHasher,
+            IUserActionTokenService tokenService,
+            IUnitOfWork unitOfWork,
+            IConfiguration configuration,
+            IJwtService jwtService)
+        {
+            _db = db;
+            _mailService = mailService;
+            _passwordHasher = passwordHasher;
+            _tokenService = tokenService;
+            _unitOfWork = unitOfWork;
+            _configuration = configuration;
+            _jwtService = jwtService;
+        }
+
+
+        [HttpPost("create-employee")]
+        [Authorize(Roles = "Admin")] // 限公司管理員可呼叫
+        public async Task<IActionResult> CreateEmployee([FromBody] RegisterEmployeeDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return BadRequest(ApiResponse<string>.FailResponse("無效的輸入", errors, 400));
+            }
+
+            // 取得登入者資訊
+            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var adminUser = await _db.TUsers.FindAsync(adminId);
+            if (adminUser == null || adminUser.Role != "Admin")
+                return Forbid("只有公司管理員可以新增員工");
+
+
+            // 檢查信箱是否已註冊
+            var existingUser = await _db.TUsers.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (existingUser != null)
+                return BadRequest(ApiResponse<string>.FailResponse("此信箱已被使用", null, 400));
+
+            // 建立員工帳號（尚未設定密碼）
+            var newUser = new TUser
+            {
+                Email = dto.Email,
+                Username = dto.Username,
+                Role = "Employee",
+                UserStatus = "PendingInit",
+                IsEmailConfirmed = false,
+                CompanyId = adminUser.CompanyId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.TUsers.Add(newUser);
+            await _db.SaveChangesAsync();
+
+            // 建立初始化密碼用的 Token
+            // 寄送信件
+            var tokenEntity = await _tokenService.CreateTokenAsync(newUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(1));
+            var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
+            var link = $"{baseUrl}/#/init-password?token={tokenEntity.Token}";
+            var body = EmailTemplateBuilder.BuildInitPasswordEmail(newUser.Username, link);
+            await _mailService.SendAsync(newUser.Email, "【學習平台】帳號啟用與密碼設定", body);
+
+            return Ok(ApiResponse<string>.SuccessResponse(
+                data: "員工帳號已建立，初始化密碼信件已寄出",
+                statusCode: 200
+            ));
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO dto)
+        {
+            var user = await _db.TUsers.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return Ok(ApiResponse<string>.SuccessResponse("若此信箱存在，系統將寄出重設密碼信件", 200));
+
+            var tokenEntity = await _tokenService.CreateTokenAsync(user.UserId, UserActionTokenTypes.ResetPassword, TimeSpan.FromHours(1));
+            var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
+            var link = $"{baseUrl}/#/reset-password?token={tokenEntity.Token}";
+            var body = EmailTemplateBuilder.BuildResetPasswordEmail(user.Username, link);
+            await _mailService.SendAsync(user.Email, "重設密碼通知", body);
+
+            return Ok(ApiResponse<string>.SuccessResponse(
+                data: "若此信箱存在，系統將寄出重設密碼信件",
+                statusCode: 200
+            ));
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
+        {
+            var tokenEntity = await _tokenService.GetValidTokenAsync(dto.Token, UserActionTokenTypes.ResetPassword);
+            if (tokenEntity == null)
+                return BadRequest(ApiResponse<string>.FailResponse("Token 無效或已過期", null, 400));
+
+            var user = tokenEntity.User;
+            if (user == null)
+                return NotFound(ApiResponse<string>.FailResponse("找不到使用者", null, 404));
+
+            // 修改密碼
+            user.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
+            user.IsEmailConfirmed = true;
+
+            // 自動解除鎖定 & 清除失敗紀錄
+            user.FailedLoginCount = 0;
+            user.LockoutEndTime = null;
+
+            // 標記 Token 已使用
+            await _tokenService.MarkTokenAsUsedAsync(tokenEntity);
+
+            // 自動產生 AccessToken 與 RefreshToken
+            var accessToken = _jwtService.GenerateAccessToken(user);
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var userAgent = Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty;
+            var refreshToken = await _jwtService.GenerateRefreshToken(user.UserId, ip, userAgent);
+
+            // 儲存變更
+            _db.TRefreshTokens.Add(refreshToken);
+            await _unitOfWork.CompleteAsync();
+
+            // 回傳給前端自動登入
+            return Ok(ApiResponse<object>.SuccessResponse(
+            data: new
+            {
+                message = "密碼重設成功，已自動登入",
+                accessToken,
+                refreshToken = refreshToken.Token,
+                username = user.Username,
+                role = user.Role
+            },
+            statusCode: 200
+            ));
+        }
+
+
+        [HttpPost("init-password")]
+        public async Task<IActionResult> InitPassword([FromBody] InitPasswordDTO dto)
+        {
+            var tokenEntity = await _tokenService.GetValidTokenAsync(dto.Token, UserActionTokenTypes.InitPassword);
+            if (tokenEntity == null)
+                return BadRequest(ApiResponse<string>.FailResponse(
+                    message: "Token 無效或已過期",
+                    errors: null,
+                    statusCode: 400
+                ));
+
+            var user = tokenEntity.User;
+            if (user == null)
+                return NotFound(ApiResponse<string>.FailResponse("找不到使用者", null, 404));
+
+            user.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
+            user.IsEmailConfirmed = true;
+
+            await _tokenService.MarkTokenAsUsedAsync(tokenEntity);
+            await _unitOfWork.CompleteAsync();
+            return Ok(ApiResponse<string>.SuccessResponse(
+                data: "密碼設定成功，帳號已啟用",
+                statusCode: 200
+            ));
+        }
+    }
+}
