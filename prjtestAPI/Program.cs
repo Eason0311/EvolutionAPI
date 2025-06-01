@@ -131,6 +131,9 @@ app.UseMiddleware<JwtAuthorizationMiddleware>();
 // 授權
 app.UseAuthorization();
 
+// 啟用靜態檔案服務 (預設會根據 wwwroot)
+app.UseStaticFiles();
+
 // Map Controllers
 app.MapControllers();
 
