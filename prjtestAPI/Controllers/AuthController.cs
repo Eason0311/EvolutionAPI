@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Attributes;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
@@ -26,6 +27,7 @@ namespace prjtestAPI.Controllers
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUserActionTokenService _tokenService;
         private readonly IMailService _mailService;
+        private readonly IRefreshTokenService _rtService;
 
         public AuthController
         (
@@ -39,7 +41,8 @@ namespace prjtestAPI.Controllers
         IOptions<JwtSettings> jwtOptions,
         IPasswordHasher passwordHasher,
         IUserActionTokenService tokenService,
-        IMailService mailService
+        IMailService mailService,
+        IRefreshTokenService rtService
         )
         {
             _jwtService = jwtService;
@@ -53,6 +56,7 @@ namespace prjtestAPI.Controllers
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
             _mailService = mailService;
+            _rtService = rtService;
         }
 
         // 註冊
@@ -61,13 +65,19 @@ namespace prjtestAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return StatusCode(400, ApiResponse<string>.FailResponse("無效的輸入", errors, 400));
+                var errors = ModelState.Values
+                               .SelectMany(v => v.Errors)
+                               .Select(e => e.ErrorMessage)
+                               .ToList();
+                return StatusCode(400, ApiResponse<string>
+                    .FailResponse("無效的輸入", errors, 400));
             }
 
+            // 先檢查同 Email 的使用者是否存在
             var existingUser = await _userRepo.GetByEmailAsync(model.Email);
             if (existingUser != null)
-                return StatusCode(400, ApiResponse<string>.FailResponse("該電子郵件已被註冊", null, 400));
+                return StatusCode(400, ApiResponse<string>
+                    .FailResponse("該電子郵件已被註冊", null, 400));
 
             var user = new TUser
             {
@@ -78,7 +88,10 @@ namespace prjtestAPI.Controllers
                 UserStatus = "Active"
             };
 
-            await _userRepo.AddAsync(user);
+            // 1. 只把 user 標示為「待新增」，不立即 SaveChanges
+            _userRepo.Add(user);
+
+            // 2. 統一一次性 commit，所有暫存變更才送到資料庫
             await _unitOfWork.CompleteAsync();
 
             return Ok(ApiResponse<string>.SuccessResponse("註冊成功", 200));
@@ -134,6 +147,10 @@ namespace prjtestAPI.Controllers
                         }
                     }
 
+                    // 標示 user 的更新（只把變更標示到 DbContext）
+                    _userRepo.Update(user);
+
+                    // 一次性 commit user 修改
                     await _unitOfWork.CompleteAsync();
 
                     var msg = user.FailedLoginCount >= 3
@@ -146,20 +163,24 @@ namespace prjtestAPI.Controllers
                 // 密碼正確 → 重置鎖定狀態
                 user.FailedLoginCount = 0;
                 user.LockoutEndTime = null;
+                _userRepo.Update(user);
 
                 var accessToken = _jwtService.GenerateAccessToken(user);
-                var refreshTokenEntity = await _jwtService.GenerateRefreshToken(
+                var newRefreshTokenEntity = await _jwtService.GenerateRefreshToken(
                     user.UserId,
                     HttpContext.Connection.RemoteIpAddress?.ToString(),
                     HttpContext.Request.Headers["User-Agent"].ToString());
 
-                await _refreshRepo.AddAsync(refreshTokenEntity);
+                // 1. 標示新 RefreshToken 要新增到 ChangeTracker
+                await _refreshRepo.AddAsync(newRefreshTokenEntity);
+
+                // 2. 一次性 commit：更新 user + 新增 RefreshToken
                 await _unitOfWork.CompleteAsync();
 
                 var response = new AuthResponseDto
                 {
                     AccessToken = accessToken,
-                    RefreshToken = refreshTokenEntity.Token,
+                    RefreshToken = newRefreshTokenEntity.Token,
                     ExpiresIn = _jwtSettings.AccessTokenExpirationMinutes * 60
                 };
 
@@ -168,7 +189,7 @@ namespace prjtestAPI.Controllers
             }
             catch (Exception ex)
             {
-                // ✅ 記錄 Log（可選）
+                // 記錄 Log（可選）
                 _logger.LogError(ex, "Login 發生未預期錯誤");
 
                 return StatusCode(500, ApiResponse<string>.FailResponse("伺服器發生錯誤，請稍後再試", null, 500));
@@ -182,22 +203,22 @@ namespace prjtestAPI.Controllers
             // 1. 查詢 Refresh Token 紀錄
             var tokenEntity = await _refreshRepo.GetByTokenAsync(dto.RefreshToken);
 
-            // 2. 驗證 Refresh Token 是否存在、是否撤銷、是否過期
+            // 2. 驗證是否有效
             if (tokenEntity == null || tokenEntity.IsRevoked || tokenEntity.ExpiryDate < DateTime.UtcNow)
-                return StatusCode(401, ApiResponse<string>.FailResponse("無效、過期或已撤銷的 Refresh Token", null, 401));
+                return StatusCode(401, ApiResponse<string>
+                    .FailResponse("無效、過期或已撤銷的 Refresh Token", null, 401));
 
-            // 3. 查詢對應的使用者
+            // 3. 查詢對應使用者
             var user = await _userRepo.GetByIdAsync(tokenEntity.UserId);
             if (user == null)
-                return StatusCode(401, ApiResponse<string>.FailResponse("使用者不存在", null, 401));
+                return StatusCode(401, ApiResponse<string>
+                    .FailResponse("使用者不存在", null, 401));
 
-
-            // 4. 標示舊的 Refresh Token 為已撤銷（防止重複使用）
+            // 4. 標示舊的 Refresh Token 為已撤銷
             tokenEntity.IsRevoked = true;
-            _refreshRepo.Update(tokenEntity); // 確保你有實作 Update 方法
-            await _unitOfWork.CompleteAsync();
+            _refreshRepo.Update(tokenEntity);
 
-            // 5. 發行新的 Access Token 與 Refresh Token
+            // 5. 發行新的 Access Token 與 Refresh Token，並標示成待新增
             var newAccessToken = _jwtService.GenerateAccessToken(user);
             var newRefreshTokenEntity = await _jwtService.GenerateRefreshToken(
                 user.UserId,
@@ -205,15 +226,17 @@ namespace prjtestAPI.Controllers
                 HttpContext.Request.Headers["User-Agent"].ToString());
 
             await _refreshRepo.AddAsync(newRefreshTokenEntity);
+
+            // 6. 統一一次 commit：把「撤銷舊 Token」和「新增新 Token」都在同一 transaction
             await _unitOfWork.CompleteAsync();
 
-            // 6. 回傳新的 Token 給前端
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(new AuthResponseDto
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshTokenEntity.Token,
-                ExpiresIn = _jwtSettings.AccessTokenExpirationMinutes * 60
-            }, "Token 更新成功", 200));
+            return Ok(ApiResponse<AuthResponseDto>
+                .SuccessResponse(new AuthResponseDto
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshTokenEntity.Token,
+                    ExpiresIn = _jwtSettings.AccessTokenExpirationMinutes * 60
+                }, "Token 更新成功", 200));
         }
 
 

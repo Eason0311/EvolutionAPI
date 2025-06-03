@@ -2,7 +2,7 @@
 using prjtestAPI;
 using prjtestAPI.Repositories.Interfaces;
 
-public class UnitOfWork : IUnitOfWork, IAsyncDisposable
+public class UnitOfWork : IUnitOfWork
 {
     private readonly TestApiContext _context;
     private IUserRepository? _users;
@@ -19,10 +19,5 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
     public async Task<int> CompleteAsync()
     {
         return await _context.SaveChangesAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _context.DisposeAsync();
     }
 }

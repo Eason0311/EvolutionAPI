@@ -22,22 +22,19 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task AddAsync(TRefreshToken refreshToken)
     {
+        // 這裡只把資料「新增到 ChangeTracker」，但不 commit
         await _context.TRefreshTokens.AddAsync(refreshToken);
-        await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(TRefreshToken refreshToken)
+    public void Update(TRefreshToken refreshToken)
     {
+        // 標示此實體要更新到 DB，但不 commit
         _context.TRefreshTokens.Update(refreshToken);
-        await _context.SaveChangesAsync();
     }
-    public async Task DeleteAsync(TRefreshToken entity)
+
+    public void Delete(TRefreshToken refreshToken)
     {
-        _context.TRefreshTokens.Remove(entity);
-        await _context.SaveChangesAsync();
-    }
-    public void Update(TRefreshToken token)
-    {
-        _context.TRefreshTokens.Update(token);
+        // 標示此實體要刪除，但不 commit
+        _context.TRefreshTokens.Remove(refreshToken);
     }
 }

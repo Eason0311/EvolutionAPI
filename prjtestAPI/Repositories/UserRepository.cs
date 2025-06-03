@@ -24,15 +24,15 @@ public class UserRepository : IUserRepository
         return await _context.TUsers.FindAsync(userId);
     }
 
-    public async Task AddAsync(TUser user)
+    public void Add(TUser user)
     {
-        await _context.TUsers.AddAsync(user);
-        await _context.SaveChangesAsync();
+        _context.TUsers.Add(user);
+        // 不在這裡呼叫 SaveChangesAsync()
     }
 
-    public async Task UpdateAsync(TUser user)
+    public void Update(TUser user)
     {
         _context.TUsers.Update(user);
-        await _context.SaveChangesAsync();
+        // 同樣不在這裡呼叫 SaveChangesAsync()
     }
 }
