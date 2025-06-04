@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace prjtestAPI.Models;
+namespace prjEvolutionAPI.Models;
 
 public partial class TUser
 {

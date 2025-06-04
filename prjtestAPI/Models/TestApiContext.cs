@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using prjtestAPI.Models;
 
-namespace prjtestAPI.Data;
+namespace prjEvolutionAPI.Models;
 
 public partial class TestApiContext : DbContext
 {
@@ -36,7 +35,6 @@ public partial class TestApiContext : DbContext
 
             entity.ToTable("tCompanies");
 
-            entity.Property(e => e.CompanyId).ValueGeneratedNever();
             entity.Property(e => e.ContactEmail).HasMaxLength(100);
             entity.Property(e => e.ContractEndAt).HasColumnType("datetime");
             entity.Property(e => e.ContractStartAt).HasColumnType("datetime");

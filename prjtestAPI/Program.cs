@@ -5,7 +5,6 @@ using Microsoft.OpenApi.Models;
 using prjEvolutionAPI.Services.Interfaces;
 using prjEvolutionAPI.Services;
 using prjtestAPI;
-using prjtestAPI.Data;
 using prjtestAPI.Helpers;
 using prjtestAPI.Middleware;
 using prjtestAPI.Repositories.Interfaces;
@@ -13,6 +12,11 @@ using prjtestAPI.Services.Interfaces;
 using System.Security.Claims;
 using System.Text;
 using prjtestAPI.Services;
+using prjEvolutionAPI.Repositories.Interfaces;
+using prjEvolutionAPI.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
+using prjEvolutionAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +52,12 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUserActionTokenService, UserActionTokenService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
+builder.Services.AddScoped<ICompenyService, CompenyService>();
 
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,6 +77,50 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
             RoleClaimType = ClaimTypes.Role
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json; charset=utf-8";
+
+                // 1. 取得目前請求的 Endpoint
+                var endpoint = context.HttpContext.GetEndpoint();
+                // 2. 從 Metadata 取出 [Authorize] 上的 Roles
+                var authorizeAttrs = endpoint?.Metadata.GetOrderedMetadata<AuthorizeAttribute>();
+                string requiredRoles = "";
+                if (authorizeAttrs != null && authorizeAttrs.Count > 0)
+                {
+                    // 可能存在多個 [Authorize]，這邊合併它們的 Roles 屬性
+                    requiredRoles = string.Join(",",
+                        authorizeAttrs
+                            .Where(a => !string.IsNullOrEmpty(a.Roles))
+                            .Select(a => a.Roles));
+                }
+
+                // 3. 取得當前使用者的角色 (如果有多個，以逗號分隔)
+                var userRoles = context.HttpContext.User?.FindAll(ClaimTypes.Role)
+                                   .Select(c => c.Value)
+                                   .ToList()
+                               ?? new List<string>();
+                string currentRoles = userRoles.Count > 0
+                    ? string.Join(",", userRoles)
+                    : "未登入或角色未知";
+
+                // 4. 組出要回傳的 JSON 內容
+                var payload = new
+                {
+                    success = false,
+                    // 如果 endpoint 沒指定 Roles，就顯示「無法存取」的通用訊息
+                    error = string.IsNullOrEmpty(requiredRoles)
+                        ? "您沒有存取此資源的權限"
+                        : $"此功能需要 {requiredRoles} 權限，您目前身分是 {currentRoles}"
+                };
+                var json = JsonSerializer.Serialize(payload);
+                await context.Response.WriteAsync(json);
+            }
         };
     });
 

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.Account;
+using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Constants;
-using prjtestAPI.Data;
 using prjtestAPI.Helpers;
 using prjtestAPI.Models;
 using prjtestAPI.Models.DTOs.Account;
@@ -22,6 +24,7 @@ namespace prjtestAPI.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly IJwtService _jwtService;
+        private readonly ICompenyService _compenyService;
 
         public AccountController(
             TestApiContext db,
@@ -30,7 +33,8 @@ namespace prjtestAPI.Controllers
             IUserActionTokenService tokenService,
             IUnitOfWork unitOfWork,
             IConfiguration configuration,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            ICompenyService compenyService)
         {
             _db = db;
             _mailService = mailService;
@@ -39,8 +43,38 @@ namespace prjtestAPI.Controllers
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _jwtService = jwtService;
+            _compenyService = compenyService;
         }
 
+        [HttpPost("create-company")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> CreateCompany([FromBody] RegisterCompanyDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var allErrors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .SelectMany(kvp => kvp.Value.Errors.Select(e => e.ErrorMessage))
+                    .ToList();
+
+                var errorMsg = string.Join("；", allErrors);
+
+                return BadRequest(
+                ApiResponse<string>.FailResponse(errorMsg, null, 400)
+                );
+            }
+
+            var result = await _compenyService.CreateCompanyWithAdminAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(
+                    ApiResponse<string>.FailResponse(result.ErrorMessage!, null, 400));
+            
+            return Ok(ApiResponse<string>.SuccessResponse(
+                data: "公司與管理員已建立，初始密碼信件已寄出",
+                statusCode: 200
+            ));
+        }
 
         [HttpPost("create-employee")]
         [Authorize(Roles = "Admin")] // 限公司管理員可呼叫

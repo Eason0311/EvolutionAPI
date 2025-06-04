@@ -1,4 +1,4 @@
-﻿namespace prjEvolutionAPI.Models.DTOs
+﻿namespace prjEvolutionAPI.Models.DTOs.User
 {
     public class UserInfoDTO
     {

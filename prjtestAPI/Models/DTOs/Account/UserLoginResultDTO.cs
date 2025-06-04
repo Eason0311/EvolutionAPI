@@ -1,4 +1,6 @@
-﻿namespace prjtestAPI.Models.DTOs.Account
+﻿using prjEvolutionAPI.Models;
+
+namespace prjtestAPI.Models.DTOs.Account
 {
     public class UserLoginResultDTO
     {

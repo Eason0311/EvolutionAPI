@@ -1,4 +1,5 @@
-﻿using prjEvolutionAPI.Models.DTOs;
+﻿using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.User;
 using prjtestAPI.Models;
 using prjtestAPI.Models.DTOs.Account;
 using prjtestAPI.Repositories.Interfaces;

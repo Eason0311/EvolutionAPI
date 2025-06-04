@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Attributes;
 using prjtestAPI.Constants;

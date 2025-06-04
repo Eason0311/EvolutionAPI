@@ -1,4 +1,4 @@
-﻿using prjEvolutionAPI.Models.DTOs;
+﻿using prjEvolutionAPI.Models.DTOs.User;
 using prjtestAPI.Models;
 using prjtestAPI.Models.DTOs.Account;
 

@@ -3,13 +3,13 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using prjEvolutionAPI.Models.DTOs;
 using prjtestAPI.Helpers;
 using prjtestAPI.Repositories.Interfaces;
 using prjtestAPI.Services.Interfaces;
-using prjtestAPI.Data;
 using prjEvolutionAPI.Helpers;
 using prjtestAPI.Models;
+using prjEvolutionAPI.Models.DTOs.User;
+using prjEvolutionAPI.Models;
 
 namespace prjtestAPI.Controllers
 {
