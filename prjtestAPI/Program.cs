@@ -53,12 +53,16 @@ builder.Services.AddScoped<IUserActionTokenService, UserActionTokenService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<ICompOrderService, CompOrderService>();
+builder.Services.AddScoped<IEmpOrderService, EmpOrderService>();
 
 // 7. µù¥U¦UºØ Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IDepListRepository, DepListRepository>();
+builder.Services.AddScoped<ICompOrderRepository, CompOrderRepository>();
+builder.Services.AddScoped<IEmpOrderRepository, EmpOrderRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

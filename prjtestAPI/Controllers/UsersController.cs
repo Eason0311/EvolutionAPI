@@ -10,6 +10,7 @@ using prjEvolutionAPI.Helpers;
 using prjtestAPI.Models;
 using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Services.Interfaces;
 
 namespace prjtestAPI.Controllers
 {
@@ -29,6 +30,7 @@ namespace prjtestAPI.Controllers
         private readonly IUserActionTokenService _tokenService;
         private readonly IMailService _mailService;
         private readonly EvolutionApiContext _db;
+        private readonly IEmpOrderService _empOrderService;
 
         public UsersController
         (
@@ -43,7 +45,8 @@ namespace prjtestAPI.Controllers
         IPasswordHasher passwordHasher,
         IUserActionTokenService tokenService,
         IMailService mailService,
-        EvolutionApiContext db
+        EvolutionApiContext db,
+        IEmpOrderService empOrderService
         )
         {
             _jwtService = jwtService;
@@ -58,6 +61,7 @@ namespace prjtestAPI.Controllers
             _tokenService = tokenService;
             _mailService = mailService;
             _db = db;
+            _empOrderService = empOrderService;
         }
 
         [HttpGet("useridfo")]
@@ -93,6 +97,54 @@ namespace prjtestAPI.Controllers
                     dto,
                     "取得成功",
                     200));
+        }
+
+        [HttpGet("user-order")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<IEnumerable<EmpOrderDTO>>>> GetUserOrder()
+        {
+            // 1. 從 Jwt 中取出 userId
+            int? checkUserId = User.GetUserId();
+            if (checkUserId == null)
+            {
+                return Unauthorized(
+                    ApiResponse<IEnumerable<EmpOrderDTO>>.FailResponse(
+                        "使用者識別錯誤，請重新登入。",
+                        null,
+                        401));
+            }
+            int userId = checkUserId.Value;
+
+            try
+            {
+                // 2. 呼叫 Service 拿訂單 DTO 清單
+                var data = await _empOrderService.GetEmpOrderListByIdAsync(userId);
+
+                // 無論 data 是空集合還是真有資料，都一律回 200 + 成功格式
+                return Ok(
+                    ApiResponse<IEnumerable<EmpOrderDTO>>.SuccessResponse(
+                        data,
+                        "取得成功",
+                        200));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // User 不存在就回 404
+                return NotFound(
+                    ApiResponse<IEnumerable<EmpOrderDTO>>.FailResponse(
+                        ex.Message,
+                        null,
+                        404));
+            }
+            catch
+            {
+                // 其他例外回 500
+                return StatusCode(500,
+                    ApiResponse<IEnumerable<EmpOrderDTO>>.FailResponse(
+                        "伺服器錯誤，請稍後再試。",
+                        null,
+                        500));
+            }
         }
     }
 }

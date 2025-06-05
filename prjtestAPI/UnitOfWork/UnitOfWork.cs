@@ -11,13 +11,17 @@ public class UnitOfWork : IUnitOfWork
     private readonly IRefreshTokenRepository _refreshTokens;
     private readonly ICompanyRepository _company;
     private readonly IDepListRepository _depList;
+    private readonly ICompOrderRepository _compOrder;
+    private readonly IEmpOrderRepository _empOrder;
 
     public UnitOfWork(
         EvolutionApiContext context,
         IUserRepository users,
         IRefreshTokenRepository refreshTokens,
         ICompanyRepository company,
-        IDepListRepository depList
+        IDepListRepository depList,
+        IEmpOrderRepository empOrder,
+        ICompOrderRepository compOrder
         )
     {
         _context = context;
@@ -25,12 +29,16 @@ public class UnitOfWork : IUnitOfWork
         _refreshTokens = refreshTokens;
         _company = company;
         _depList = depList;
+        _compOrder = compOrder;
+        _empOrder = empOrder;
     }
 
     public IUserRepository Users => _users;
     public IRefreshTokenRepository RefreshTokens => _refreshTokens;
     public ICompanyRepository Company => _company;
     public IDepListRepository DepList => _depList;
+    public IEmpOrderRepository EmpOrder => _empOrder;
+    public ICompOrderRepository CompOrder => _compOrder;
 
     public async Task<int> CompleteAsync()
     {

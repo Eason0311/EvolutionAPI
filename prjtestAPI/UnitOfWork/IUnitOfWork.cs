@@ -8,6 +8,8 @@ public interface IUnitOfWork
     IRefreshTokenRepository RefreshTokens { get; }
     ICompanyRepository Company { get; }
     IDepListRepository DepList { get; }
+    IEmpOrderRepository EmpOrder { get; }
+    ICompOrderRepository CompOrder { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }
