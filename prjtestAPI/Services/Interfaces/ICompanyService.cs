@@ -3,7 +3,7 @@ using prjEvolutionAPI.Models.DTOs.User;
 
 namespace prjEvolutionAPI.Services.Interfaces
 {
-    public interface ICompenyService
+    public interface ICompanyService
     {
         Task<ServiceResult> CreateCompanyWithAdminAsync(RegisterCompanyDTO dto);
     }

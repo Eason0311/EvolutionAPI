@@ -1,29 +1,26 @@
 ﻿using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
-using prjEvolutionAPI.Repositories.Interfaces;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
-using prjtestAPI.Models;
-using prjtestAPI.Repositories.Interfaces;
 using prjtestAPI.Services.Interfaces;
 
 namespace prjEvolutionAPI.Services
 {
-    public class CompenyService : ICompenyService
+    public class CompanyService : ICompanyService
     {
-        private readonly ICompanyRepository _companyRepo;
-        private readonly IUserRepository _userRepo;
         private readonly IUnitOfWork _uow;
         private readonly IMailService _mailService;
         private readonly IUserActionTokenService _tokenService;
         private readonly IConfiguration _configuration;
 
-        public CompenyService(ICompanyRepository companyRepo, IUnitOfWork uow,IUserRepository userRepo,IMailService mailService, IConfiguration configuration, IUserActionTokenService tokenService)
+        public CompanyService(
+            IUnitOfWork uow,
+            IMailService mailService, 
+            IConfiguration configuration, 
+            IUserActionTokenService tokenService)
         {
-            _companyRepo = companyRepo;
             _uow = uow;
-            _userRepo = userRepo;
             _mailService = mailService;
             _tokenService = tokenService;
             _configuration = configuration;
@@ -31,18 +28,18 @@ namespace prjEvolutionAPI.Services
 
         public async Task<ServiceResult> CreateCompanyWithAdminAsync(RegisterCompanyDTO dto)
         {
-            var existingCompany = await _companyRepo.GetByEmailAsync(dto.Email);
+            var existingCompany = await _uow.Company.GetByEmailAsync(dto.Email);
             if (existingCompany != null)
                 return ServiceResult.Fail($"聯絡 Email ({dto.Email}) 已被其他公司使用");
 
-            var existUser = await _userRepo.GetByEmailAsync(dto.Email);
+            var existUser = await _uow.Users.GetByEmailAsync(dto.Email);
             if (existUser != null)
                 return ServiceResult.Fail($"此 Email ({dto.Email}) 已被其他使用者註冊");
 
-            var nerCompeny = new TCompany
+            var newCompany = new TCompany
             {
-                Name = dto.CompanyName,
-                ContactEmail = dto.Email,
+                CompanyName = dto.CompanyName,
+                CompanyEmail = dto.Email,
                 CreatedAt = DateTime.UtcNow,
             };
 
@@ -53,7 +50,15 @@ namespace prjEvolutionAPI.Services
             {
                 await _uow.ExecuteTransactionAsync(async () =>
                 {
-                    _companyRepo.Add(nerCompeny);
+                    _uow.Company.Add(newCompany);
+                    await _uow.CompleteAsync();
+
+                    var defaultDept = new TDepList
+                    {
+                        DepName = "管理員",
+                        CompanyId = newCompany.CompanyId
+                    };
+                    _uow.DepList.Add(defaultDept);
                     await _uow.CompleteAsync();
 
                     var adminUser = new TUser
@@ -63,8 +68,10 @@ namespace prjEvolutionAPI.Services
                         PasswordHash = hashedPassword,
                         Role = "Admin",
                         IsEmailConfirmed = false,
-                        CompanyId = nerCompeny.CompanyId,
-                        CreatedAt = DateTime.UtcNow
+                        CompanyId = newCompany.CompanyId,
+                        CreatedAt = DateTime.UtcNow,
+                        UserDep = defaultDept.DepId,
+                        UserStatus = "Active",
                     };
 
                     _uow.Users.Add(adminUser);

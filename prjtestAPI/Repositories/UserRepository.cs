@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 public class UserRepository : IUserRepository
 {
-    private readonly TestApiContext _context;
-    public UserRepository(TestApiContext context)
+    private readonly EvolutionApiContext _context;
+    public UserRepository(EvolutionApiContext context)
     {
         _context = context;
     }

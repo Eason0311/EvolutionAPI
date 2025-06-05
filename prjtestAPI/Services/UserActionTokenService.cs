@@ -7,9 +7,9 @@ namespace prjtestAPI.Services
 {
     public class UserActionTokenService : IUserActionTokenService
     {
-        private readonly TestApiContext _db;
+        private readonly EvolutionApiContext _db;
 
-        public UserActionTokenService(TestApiContext db)
+        public UserActionTokenService(EvolutionApiContext db)
         {
             _db = db;
         }

@@ -126,7 +126,7 @@ namespace prjtestAPI.Controllers
                 // 密碼錯誤
                 if (!result.PasswordValid)
                 {
-                    user.FailedLoginCount = (user.FailedLoginCount ?? 0) + 1;
+                    user.FailedLoginCount = user.FailedLoginCount + 1;
 
                     if (user.FailedLoginCount >= 3)
                     {

@@ -6,27 +6,31 @@ using prjEvolutionAPI.Models;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly TestApiContext _context;
+    private readonly EvolutionApiContext _context;
     private readonly IUserRepository _users;
     private readonly IRefreshTokenRepository _refreshTokens;
     private readonly ICompanyRepository _company;
+    private readonly IDepListRepository _depList;
 
     public UnitOfWork(
-        TestApiContext context,
+        EvolutionApiContext context,
         IUserRepository users,
         IRefreshTokenRepository refreshTokens,
-        ICompanyRepository company
+        ICompanyRepository company,
+        IDepListRepository depList
         )
     {
         _context = context;
         _users = users;
         _refreshTokens = refreshTokens;
         _company = company;
+        _depList = depList;
     }
 
     public IUserRepository Users => _users;
     public IRefreshTokenRepository RefreshTokens => _refreshTokens;
     public ICompanyRepository Company => _company;
+    public IDepListRepository DepList => _depList;
 
     public async Task<int> CompleteAsync()
     {

@@ -28,7 +28,7 @@ namespace prjtestAPI.Controllers
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUserActionTokenService _tokenService;
         private readonly IMailService _mailService;
-        private readonly TestApiContext _db;
+        private readonly EvolutionApiContext _db;
 
         public UsersController
         (
@@ -43,7 +43,7 @@ namespace prjtestAPI.Controllers
         IPasswordHasher passwordHasher,
         IUserActionTokenService tokenService,
         IMailService mailService,
-        TestApiContext db
+        EvolutionApiContext db
         )
         {
             _jwtService = jwtService;

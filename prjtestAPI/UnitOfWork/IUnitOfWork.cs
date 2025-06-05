@@ -7,6 +7,7 @@ public interface IUnitOfWork
     IUserRepository Users { get; }
     IRefreshTokenRepository RefreshTokens { get; }
     ICompanyRepository Company { get; }
+    IDepListRepository DepList { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

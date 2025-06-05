@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    private readonly TestApiContext _context;
-    public RefreshTokenRepository(TestApiContext context)
+    private readonly EvolutionApiContext _context;
+    public RefreshTokenRepository(EvolutionApiContext context)
     {
         _context = context;
     }

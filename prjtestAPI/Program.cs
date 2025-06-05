@@ -29,7 +29,7 @@ builder.Services.AddLogging(logging =>
 });
 
 // 2. µù¥U DbContext
-builder.Services.AddDbContext<TestApiContext>(options =>
+builder.Services.AddDbContext<EvolutionApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 3. CORS
@@ -52,12 +52,13 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUserActionTokenService, UserActionTokenService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
-builder.Services.AddScoped<ICompenyService, CompenyService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 // 7. µù¥U¦UºØ Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IDepListRepository, DepListRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

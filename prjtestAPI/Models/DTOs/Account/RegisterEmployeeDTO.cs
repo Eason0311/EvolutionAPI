@@ -9,5 +9,7 @@ namespace prjtestAPI.Models.DTOs.Account
         public string Email { get; set; } = null!;
         [Required(ErrorMessage = "Username 為必填")]
         public string Username { get; set; } = null!;
+        [Required(ErrorMessage = "部門名稱為必填")]
+        public string DepName { get; set; } = null!;
     }
 }

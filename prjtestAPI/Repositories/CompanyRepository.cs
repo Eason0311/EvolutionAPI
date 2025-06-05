@@ -5,8 +5,8 @@ namespace prjEvolutionAPI.Repositories
 {
     public class CompanyRepository : ICompanyRepository
     {
-        private readonly TestApiContext _context;
-        public CompanyRepository(Models.TestApiContext context)
+        private readonly EvolutionApiContext _context;
+        public CompanyRepository(Models.EvolutionApiContext context)
         {
             _context = context;
         }
@@ -20,7 +20,7 @@ namespace prjEvolutionAPI.Repositories
         }
         public async Task<TCompany?> GetByEmailAsync(string email)
         {
-            return _context.TCompanies.FirstOrDefault(c => c.ContactEmail == email);
+            return _context.TCompanies.FirstOrDefault(c => c.CompanyEmail == email);
         }
 
     }

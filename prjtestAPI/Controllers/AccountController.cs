@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using prjEvolutionAPI.Helpers;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
+using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
@@ -11,30 +13,32 @@ using prjtestAPI.Models.DTOs.Account;
 using prjtestAPI.Services.Interfaces;
 using System.Security.Claims;
 
-namespace prjtestAPI.Controllers
+namespace prjEvolutionAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly TestApiContext _db;
+        private readonly EvolutionApiContext _db;
         private readonly IMailService _mailService;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUserActionTokenService _tokenService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly IJwtService _jwtService;
-        private readonly ICompenyService _compenyService;
+        private readonly ICompanyService _compenyService;
+        private IUserService _userService;
 
         public AccountController(
-            TestApiContext db,
+            EvolutionApiContext db,
             IMailService mailService,
             IPasswordHasher passwordHasher,
             IUserActionTokenService tokenService,
             IUnitOfWork unitOfWork,
             IConfiguration configuration,
             IJwtService jwtService,
-            ICompenyService compenyService)
+            ICompanyService compenyService,
+            IUserService userService)
         {
             _db = db;
             _mailService = mailService;
@@ -44,6 +48,7 @@ namespace prjtestAPI.Controllers
             _configuration = configuration;
             _jwtService = jwtService;
             _compenyService = compenyService;
+            _userService = userService;
         }
 
         [HttpPost("create-company")]
@@ -69,7 +74,7 @@ namespace prjtestAPI.Controllers
             if (!result.IsSuccess)
                 return BadRequest(
                     ApiResponse<string>.FailResponse(result.ErrorMessage!, null, 400));
-            
+
             return Ok(ApiResponse<string>.SuccessResponse(
                 data: "公司與管理員已建立，初始密碼信件已寄出",
                 statusCode: 200
@@ -87,39 +92,22 @@ namespace prjtestAPI.Controllers
             }
 
             // 取得登入者資訊
-            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var adminUser = await _db.TUsers.FindAsync(adminId);
-            if (adminUser == null || adminUser.Role != "Admin")
-                return Forbid("只有公司管理員可以新增員工");
-
-
-            // 檢查信箱是否已註冊
-            var existingUser = await _db.TUsers.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (existingUser != null)
-                return BadRequest(ApiResponse<string>.FailResponse("此信箱已被使用", null, 400));
-
-            // 建立員工帳號（尚未設定密碼）
-            var newUser = new TUser
+            int? checkUserId = User.GetUserId();
+            if (checkUserId == null)
             {
-                Email = dto.Email,
-                Username = dto.Username,
-                Role = "Employee",
-                UserStatus = "PendingInit",
-                IsEmailConfirmed = false,
-                CompanyId = adminUser.CompanyId,
-                CreatedAt = DateTime.UtcNow
-            };
+                return Unauthorized(
+                    ApiResponse<string>.FailResponse(
+                        "使用者識別錯誤，請重新登入。",
+                        null,
+                        401));
+            }
+            int adminId = checkUserId.Value;
 
-            _db.TUsers.Add(newUser);
-            await _db.SaveChangesAsync();
+            var result = await _userService.CreateUserAsync(dto,adminId);
 
-            // 建立初始化密碼用的 Token
-            // 寄送信件
-            var tokenEntity = await _tokenService.CreateTokenAsync(newUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(1));
-            var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
-            var link = $"{baseUrl}/#/init-password?token={tokenEntity.Token}";
-            var body = EmailTemplateBuilder.BuildInitPasswordEmail(newUser.Username, link);
-            await _mailService.SendAsync(newUser.Email, "【學習平台】帳號啟用與密碼設定", body);
+            if (!result.IsSuccess)
+                return BadRequest(
+                    ApiResponse<string>.FailResponse(result.ErrorMessage!, null, 400));
 
             return Ok(ApiResponse<string>.SuccessResponse(
                 data: "員工帳號已建立，初始化密碼信件已寄出",
