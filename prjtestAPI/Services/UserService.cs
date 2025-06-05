@@ -133,7 +133,7 @@ namespace prjtestAPI.Services
                     _uow.Users.Add(newUser);
                     await _uow.CompleteAsync();
 
-                    var tokenEntity = await _tokenService.CreateTokenAsync(newUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(1));
+                    var tokenEntity = await _tokenService.CreateTokenAsync(newUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(24));
                     var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
                     var link = $"{baseUrl}/#/init-password?token={tokenEntity.Token}";
                     var body = EmailTemplateBuilder.BuildInitPasswordEmail(newUser.Username, link);

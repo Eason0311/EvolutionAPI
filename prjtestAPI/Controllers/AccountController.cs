@@ -208,5 +208,31 @@ namespace prjEvolutionAPI.Controllers
                 statusCode: 200
             ));
         }
+
+        [HttpPost("resend-initial-password")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ResendInitialPassword([FromBody] ResendInitialDTO dto)
+        {
+            // a. 找到該員工是否存在、且屬於同一個公司的狀況可依需求檢查
+            var user = await _db.TUsers
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return NotFound(ApiResponse<string>.FailResponse("找不到此員工", null, 404));
+
+            // b. 產生一筆新的 ResetPassword Token (同樣 24 小時有效)
+            var tokenEntity = await _tokenService.CreateTokenAsync(
+                user.UserId,
+                UserActionTokenTypes.ResetPassword,
+                TimeSpan.FromHours(24)
+            );
+
+            // c. 寄信給員工
+            var baseUrl = _configuration["Frontend:BaseUrl"];
+            var resetLink = $"{baseUrl}/#/set-initial-password?token={tokenEntity.Token}";
+            var body = EmailTemplateBuilder.BuildInitPasswordEmail(user.Username, resetLink);
+            await _mailService.SendAsync(user.Email, "重新寄送：初始密碼設定通知", body);
+
+            return Ok(ApiResponse<string>.SuccessResponse("重設連結已重新寄出", 200));
+        }
     }
 }
