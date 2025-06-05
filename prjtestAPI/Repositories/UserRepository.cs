@@ -35,4 +35,10 @@ public class UserRepository : IUserRepository
         _context.TUsers.Update(user);
         // 同樣不在這裡呼叫 SaveChangesAsync()
     }
+    public async Task<TUser?> GetByIdWithDepAsync(int userId)
+    {
+        return await _context.TUsers
+           .Include(u => u.UserDepNavigation)
+           .FirstOrDefaultAsync(u => u.UserId == userId);
+    }
 }

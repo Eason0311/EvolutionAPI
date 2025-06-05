@@ -59,12 +59,12 @@ namespace prjtestAPI.Services
             };
         }
 
-        public async Task<UserInfoDTO> GetUserInfoAsync(int? userId)
+        public async Task<UserInfoDTO?> GetUserInfoAsync(int? userId)
         {
             if (userId == null)
                 return null;
 
-            TUser? user = await _userRepo.GetByIdAsync(userId.Value);
+            TUser? user = await _userRepo.GetByIdWithDepAsync(userId.Value);
             if (user == null)
                 return null;
 
@@ -72,7 +72,9 @@ namespace prjtestAPI.Services
             {
                 UserId = user.UserId,
                 Username = user.Username,
-                Email = user.Email
+                Email = user.Email,
+                UserPicPath = user.UserPic,
+                DepName = user.UserDepNavigation.DepName
             };
         }
 

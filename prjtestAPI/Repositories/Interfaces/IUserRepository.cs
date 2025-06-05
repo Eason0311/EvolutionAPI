@@ -8,6 +8,7 @@ namespace prjtestAPI.Repositories.Interfaces
     {
         Task<TUser?> GetByEmailAsync(string email);
         Task<TUser?> GetByIdAsync(int userId);
+        Task<TUser?> GetByIdWithDepAsync(int userId);
         void Add(TUser user);
         void Update(TUser user);
     }
