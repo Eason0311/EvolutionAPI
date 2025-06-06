@@ -10,5 +10,7 @@ namespace prjtestAPI.Services.Interfaces
         Task<UserLoginResultDTO?> ValidateUserAsync(string email, string password);
         Task<UserInfoDTO> GetUserInfoAsync(int? userId);
         Task<ServiceResult> CreateUserAsync(RegisterEmployeeDTO dto, int callerUserId);
+        Task<EditUserResponseDTO?> EditUserInfoAsync(int userId, EditUserInfoDTO dto);
+        Task<IEnumerable<DepListResponseDTO>> GetDepList(int userId);
     }
 }

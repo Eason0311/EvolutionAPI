@@ -38,6 +38,7 @@ public class UserRepository : IUserRepository
     public async Task<TUser?> GetByIdWithDepAsync(int userId)
     {
         return await _context.TUsers
+            .Include(u => u.Company)
            .Include(u => u.UserDepNavigation)
            .FirstOrDefaultAsync(u => u.UserId == userId);
     }

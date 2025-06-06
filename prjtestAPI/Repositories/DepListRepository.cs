@@ -15,6 +15,13 @@ namespace prjEvolutionAPI.Repositories
         {
             return await _context.TDepLists.FindAsync(UserDe);
         }
+        public async Task<IEnumerable<TDepList?>> GetByCompanyIdAsync(int companyId)
+        {
+            return await _context.TDepLists
+                .AsNoTracking()
+                .Where(c => c.CompanyId == companyId )
+                .ToArrayAsync();
+        }
         public async Task<TDepList?> GetFirstOrDefaultAsync(string depName, int companyId)
         {
             return await _context.TDepLists

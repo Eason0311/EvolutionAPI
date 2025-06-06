@@ -1,4 +1,5 @@
-﻿using prjEvolutionAPI.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Repositories.Interfaces;
 
 namespace prjEvolutionAPI.Repositories
@@ -17,6 +18,14 @@ namespace prjEvolutionAPI.Repositories
         public async Task<TCompany?> GetByIdAsync(int companyId)
         {
             return await _context.TCompanies.FindAsync(companyId);
+        }
+        public async Task<TCompany?> GetByUserIdAsync(int userId)
+        {
+            return await _context.TUsers
+                .Where(u => u.UserId == userId)
+                .Select(u => u.Company)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
         public async Task<TCompany?> GetByEmailAsync(string email)
         {

@@ -7,6 +7,7 @@ namespace prjEvolutionAPI.Repositories.Interfaces
     {
         void Add(TCompany company);
         Task<TCompany?> GetByIdAsync(int companyId);
+        Task<TCompany?> GetByUserIdAsync(int userId);
         Task<TCompany?> GetByEmailAsync(string email);
     }
 }

@@ -11,6 +11,9 @@ using prjtestAPI.Models;
 using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Services.Interfaces;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using prjEvolutionAPI.Repositories;
+using prjEvolutionAPI.Repositories.Interfaces;
 
 namespace prjtestAPI.Controllers
 {
@@ -31,6 +34,7 @@ namespace prjtestAPI.Controllers
         private readonly IMailService _mailService;
         private readonly EvolutionApiContext _db;
         private readonly IEmpOrderService _empOrderService;
+        private readonly ICompanyService _companyService;
 
         public UsersController
         (
@@ -46,7 +50,8 @@ namespace prjtestAPI.Controllers
         IUserActionTokenService tokenService,
         IMailService mailService,
         EvolutionApiContext db,
-        IEmpOrderService empOrderService
+        IEmpOrderService empOrderService,
+        ICompanyService companyService
         )
         {
             _jwtService = jwtService;
@@ -62,9 +67,10 @@ namespace prjtestAPI.Controllers
             _mailService = mailService;
             _db = db;
             _empOrderService = empOrderService;
+            _companyService = companyService;
         }
 
-        [HttpGet("useridfo")]
+        [HttpGet("userinfo")]
         [Authorize]
         public async Task<ActionResult<ApiResponse<UserInfoDTO>>> GetUserInfo()
         {
@@ -145,6 +151,71 @@ namespace prjtestAPI.Controllers
                         null,
                         500));
             }
+        }
+
+        [HttpPut("edituseridfo")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<EditUserResponseDTO>>> EditUserInfo([FromForm] EditUserInfoDTO dto)
+        {
+            int? checkUserId = User.GetUserId();
+            if (checkUserId == null)
+            {
+                return Unauthorized(ApiResponse<EditUserResponseDTO>.FailResponse(
+                    "使用者識別錯誤，請重新登入。",
+                    null,
+                    401));
+            }
+            int userId = checkUserId.Value;
+
+            var result = await _userService.EditUserInfoAsync(userId, dto);
+            if (result == null)
+                return NotFound(ApiResponse<EditUserResponseDTO>.FailResponse(
+                    "找不到此使用者",
+                    null,
+                    404));
+
+            if (!string.IsNullOrEmpty(result.UserInfo.UserPicPath))
+            {
+                // TrimStart('/') 確保不要出現重複的斜線
+                result.UserInfo.PhotoUrl = $"{Request.Scheme}://{Request.Host}/{result.UserInfo.UserPicPath.TrimStart('/')}";
+            }
+
+            return Ok(ApiResponse<EditUserResponseDTO>.SuccessResponse(
+               result,
+               "更新成功",
+               200));
+        }
+
+        [HttpGet("dept-list")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<IEnumerable<DepListResponseDTO>>>> GetDepList()
+        {
+            int? checkUserId = User.GetUserId();
+            if (checkUserId == null)
+            {
+                return Unauthorized(ApiResponse<IEnumerable<DepListResponseDTO>>.FailResponse(
+                    "使用者識別錯誤，請重新登入。",
+                    null,
+                    401));
+            }
+            int userId = checkUserId.Value;
+
+            IEnumerable<DepListResponseDTO> deps;
+            try
+            {
+                deps = await _userService.GetDepList(userId);
+            }
+            catch (Exception ex)
+            {
+                // 如果 Service 發生例外，可依實際狀況回傳 500 或其他適當的錯誤
+                return StatusCode(500, ApiResponse<IEnumerable<DepListResponseDTO>>.FailResponse(
+                    $"伺服器發生錯誤：{ex.Message}",
+                    null,
+                    500));
+            }
+
+            // 3. 如果 Service 正常回傳，則包裹成 SuccessResponse 並回傳 200 OK
+            return Ok(ApiResponse<IEnumerable<DepListResponseDTO>>.SuccessResponse(deps));
         }
     }
 }
