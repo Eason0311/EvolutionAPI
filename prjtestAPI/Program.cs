@@ -55,6 +55,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<ICompOrderService, CompOrderService>();
 builder.Services.AddScoped<IEmpOrderService, EmpOrderService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
 
 // 7. µù¥U¦UºØ Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -63,6 +64,7 @@ builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IDepListRepository, DepListRepository>();
 builder.Services.AddScoped<ICompOrderRepository, CompOrderRepository>();
 builder.Services.AddScoped<IEmpOrderRepository, EmpOrderRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

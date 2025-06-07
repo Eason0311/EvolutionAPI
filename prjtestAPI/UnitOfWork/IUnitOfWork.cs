@@ -10,6 +10,7 @@ public interface IUnitOfWork
     IDepListRepository DepList { get; }
     IEmpOrderRepository EmpOrder { get; }
     ICompOrderRepository CompOrder { get; }
+    ICourseRepository Course { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

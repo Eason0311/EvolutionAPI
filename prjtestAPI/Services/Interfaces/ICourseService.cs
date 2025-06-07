@@ -1,0 +1,10 @@
+﻿using prjEvolutionAPI.Models.DTOs.Course;
+
+namespace prjEvolutionAPI.Services.Interfaces
+{
+    public interface ICourseService
+    {
+        Task<PagedResult<CourseDTO>> GetPagedAsync(int pageIndex, int pageSize);
+        Task<IEnumerable<CourseDTO>> GetCoursesByIdsAsync(IEnumerable<int> ids);
+    }
+}
