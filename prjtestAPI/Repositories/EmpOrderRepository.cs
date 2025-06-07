@@ -16,6 +16,8 @@ namespace prjEvolutionAPI.Repositories
             return await _context.TEmpOrders
                 .AsNoTracking()
                 .Where(e => e.BuyerUserId == employeeId)
+                .Include(e => e.Course)
+                .ThenInclude(c => c.Company)
                 .ToListAsync();
         }
     }

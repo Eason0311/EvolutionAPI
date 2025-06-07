@@ -2,6 +2,7 @@
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
 using prjEvolutionAPI.Models.DTOs.User;
+using prjEvolutionAPI.Repositories.Interfaces;
 using prjEvolutionAPI.Services;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
@@ -23,6 +24,7 @@ namespace prjtestAPI.Services
         private readonly IWebHostEnvironment _env;
         private readonly IJwtService _jwtService;
         private readonly string _baseUrl;
+        private readonly IEmpOrderRepository _empOrderRepo;
 
         public UserService(
             IUserRepository userRepo,
@@ -32,7 +34,8 @@ namespace prjtestAPI.Services
             IConfiguration configuration,
             IWebHostEnvironment env,
             IUserActionTokenService tokenService,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IEmpOrderRepository empOrderRepo)
         {
             _userRepo = userRepo;
             _passwordHasher = passwordHasher;
@@ -42,6 +45,7 @@ namespace prjtestAPI.Services
             _configuration = configuration;
             _env = env;
             _jwtService = jwtService;
+            _empOrderRepo = empOrderRepo;
             _baseUrl = _configuration.GetValue<string>("AppSettings:BaseUrl")?.TrimEnd('/')
                  ?? throw new InvalidOperationException("AppSettings:BaseUrl 未設定");
         }
