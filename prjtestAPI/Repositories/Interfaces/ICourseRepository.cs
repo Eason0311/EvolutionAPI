@@ -30,5 +30,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         /// <summary>前綴提示：回傳最多 maxResults 個 CourseTitle</summary>
         Task<List<string>> GetTitleSuggestionsAsync(string prefix, int maxResults = 10);
         Task<int> GetCourseCountAsync();
+        Task<List<CourseWithTagDTO>> GetRandomCoursesAsync(int count = 9);
     }
 }

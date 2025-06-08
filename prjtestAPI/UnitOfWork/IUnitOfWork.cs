@@ -12,6 +12,7 @@ public interface IUnitOfWork
     ICompOrderRepository CompOrder { get; }
     ICourseRepository Course { get; }
     IQuizResultsRepository QuizResults { get; }
+    IHashTagListRepository HashTagList { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

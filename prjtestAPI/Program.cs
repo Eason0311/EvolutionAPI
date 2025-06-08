@@ -70,6 +70,7 @@ builder.Services.AddScoped<ICompOrderRepository, CompOrderRepository>();
 builder.Services.AddScoped<IEmpOrderRepository, EmpOrderRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IQuizResultsRepository, QuizResultsRepository>();
+builder.Services.AddScoped<IHashTagListRepository, HashTagListRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.Course;
 using prjEvolutionAPI.Models.DTOs.Home;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Controllers;
@@ -53,6 +55,24 @@ namespace prjEvolutionAPI.Controllers
             var result = await _homeService.GetAboutInfoAsync();
 
             return Ok(ApiResponse<AboutInfoDTO>.SuccessResponse(result));
+        }
+
+        [HttpGet("randomcourse")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<CourseWithTagDTO>>>> GetRandomCoursesAsync()
+        {
+            var result = await _uow.Course.GetRandomCoursesAsync();
+
+            return Ok(ApiResponse<List<CourseWithTagDTO>>.SuccessResponse(result));
+        }
+
+        [HttpGet("randomtag")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<HashTagListDTO>>>> GetRandomTagAsync()
+        {
+            var result = await _homeService.GetRandomTagAsync();
+
+            return Ok(ApiResponse<List<HashTagListDTO>>.SuccessResponse(result));
         }
     }
 }

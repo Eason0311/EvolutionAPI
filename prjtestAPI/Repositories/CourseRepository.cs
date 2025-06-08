@@ -181,5 +181,27 @@ namespace prjEvolutionAPI.Repositories
                 .AsNoTracking()
                 .CountAsync();
         }
+
+        public async Task<List<CourseWithTagDTO>> GetRandomCoursesAsync(int count = 9)
+        {
+            // 1. 在資料庫層面隨機排序，等同 SQL: ORDER BY NEWID()
+            // 2. 取前 count 筆
+            return await _context.TCourses
+                .Include(h => h.TCourseHashTags)
+                                 .OrderBy(c => Guid.NewGuid())
+                                 .Take(count)
+                                 .Select(c => new CourseWithTagDTO
+                                 {
+                                     CourseId = c.CourseId,
+                                     CompanyId = c.CompanyId,
+                                     CompanyName = c.Company.CompanyName,
+                                     CourseTitle = c.CourseTitle,
+                                     CourseDes = c.CourseDes,
+                                     IsPublic = c.IsPublic,
+                                     CoverImagePath = $"{_baseUrl}/{c.CoverImagePath.TrimStart('/')}",
+                                     TagIds = c.TCourseHashTags.Select(t =>t.TagId).ToList()
+                                 })
+                                 .ToListAsync();
+        }
     }
 }

@@ -15,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly IEmpOrderRepository _empOrder;
     private readonly ICourseRepository _course;
     private readonly IQuizResultsRepository _quizResults;
+    private readonly IHashTagListRepository _hashTagList;
 
     public UnitOfWork(
         EvolutionApiContext context,
@@ -25,7 +26,8 @@ public class UnitOfWork : IUnitOfWork
         IEmpOrderRepository empOrder,
         ICompOrderRepository compOrder,
         ICourseRepository course,
-        IQuizResultsRepository quizResults
+        IQuizResultsRepository quizResults,
+        IHashTagListRepository hashTagList
         )
     {
         _context = context;
@@ -37,6 +39,7 @@ public class UnitOfWork : IUnitOfWork
         _empOrder = empOrder;
         _course = course;
         _quizResults = quizResults;
+        _hashTagList = hashTagList;
     }
 
     public IUserRepository Users => _users;
@@ -47,6 +50,7 @@ public class UnitOfWork : IUnitOfWork
     public ICompOrderRepository CompOrder => _compOrder;
     public ICourseRepository Course => _course;
     public IQuizResultsRepository QuizResults => _quizResults;
+    public IHashTagListRepository HashTagList => _hashTagList;
 
     public async Task<int> CompleteAsync()
     {

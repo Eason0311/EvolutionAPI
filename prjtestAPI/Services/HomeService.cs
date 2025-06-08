@@ -1,4 +1,5 @@
-﻿using prjEvolutionAPI.Models.DTOs.Home;
+﻿using prjEvolutionAPI.Models.DTOs.Course;
+using prjEvolutionAPI.Models.DTOs.Home;
 using prjEvolutionAPI.Services.Interfaces;
 
 namespace prjEvolutionAPI.Services
@@ -20,6 +21,11 @@ namespace prjEvolutionAPI.Services
                 CourseCount = await _uow.Course.GetCourseCountAsync(),
                 QuizCount = await _uow.QuizResults.GetQuizResultsCountAsync()
             };
+        }
+
+        public async Task<List<HashTagListDTO>> GetRandomTagAsync()
+        {
+            return await _uow.HashTagList.GetRandomTagAsync();
         }
     }
 }
