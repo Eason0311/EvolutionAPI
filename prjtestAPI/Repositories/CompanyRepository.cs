@@ -32,5 +32,11 @@ namespace prjEvolutionAPI.Repositories
             return _context.TCompanies.FirstOrDefault(c => c.CompanyEmail == email);
         }
 
+        public async Task<int> GetCompanyCountAsync()
+        {
+            return await _context.TCompanies
+                         .AsNoTracking()
+                         .CountAsync(c => c.IsActive);
+        }
     }
 }

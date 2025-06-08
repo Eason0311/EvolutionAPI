@@ -71,6 +71,7 @@ namespace prjEvolutionAPI.Controllers
         }
 
         [HttpPost("batch")]
+        [AllowAnonymous]
         public async Task<ActionResult<ApiResponse<IEnumerable<CourseDTO>>>> GetCoursesByIds(
        [FromBody] IEnumerable<int> ids)
         {
@@ -80,6 +81,22 @@ namespace prjEvolutionAPI.Controllers
 
             var dtos = await _courseService.GetCoursesByIdsAsync(ids);
             return Ok(ApiResponse<IEnumerable<CourseDTO>>.SuccessResponse(dtos));
+        }
+
+        [HttpGet("suggestions")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<string>>>> Suggestions([FromQuery] string prefix)
+        {
+            var data = await _uow.Course.GetTitleSuggestionsAsync(prefix);
+            return Ok(ApiResponse<List<string>>.SuccessResponse(data));
+        }
+
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<List<CourseDTO>>>> Search([FromQuery] string query)
+        {
+            var data = await _uow.Course.SearchAsync(query);
+            return Ok(ApiResponse<List<CourseDTO>>.SuccessResponse(data));
         }
     }
 }

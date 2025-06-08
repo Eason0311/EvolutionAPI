@@ -15,7 +15,7 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<IEnumerable<TCourse>> GetByCompanyIdAsync(int companyId);
 
         // 可加：關鍵字搜尋
-        Task<IEnumerable<TCourse>> SearchAsync(string keyword);
+        Task<List<CourseDTO>> SearchAsync(string query);
 
         // 可加：分頁查詢
         Task<(IEnumerable<CourseDTO> Items, int TotalCount)> GetPagedAsync(int pageIndex, int pageSize);
@@ -27,5 +27,8 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task AddAsync(TCourse entity);
         void Update(TCourse entity);
         void Delete(TCourse entity);
+        /// <summary>前綴提示：回傳最多 maxResults 個 CourseTitle</summary>
+        Task<List<string>> GetTitleSuggestionsAsync(string prefix, int maxResults = 10);
+        Task<int> GetCourseCountAsync();
     }
 }

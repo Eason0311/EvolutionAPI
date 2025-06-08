@@ -32,6 +32,9 @@ builder.Services.AddLogging(logging =>
 builder.Services.AddDbContext<EvolutionApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// 2-1. 註冊 記憶體快取
+builder.Services.AddMemoryCache();
+
 // 3. CORS
 builder.Services.AddCors(options =>
 {
@@ -56,6 +59,7 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<ICompOrderService, CompOrderService>();
 builder.Services.AddScoped<IEmpOrderService, EmpOrderService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -65,6 +69,7 @@ builder.Services.AddScoped<IDepListRepository, DepListRepository>();
 builder.Services.AddScoped<ICompOrderRepository, CompOrderRepository>();
 builder.Services.AddScoped<IEmpOrderRepository, EmpOrderRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IQuizResultsRepository, QuizResultsRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

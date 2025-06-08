@@ -9,5 +9,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TCompany?> GetByIdAsync(int companyId);
         Task<TCompany?> GetByUserIdAsync(int userId);
         Task<TCompany?> GetByEmailAsync(string email);
+        Task<int> GetCompanyCountAsync();
     }
 }

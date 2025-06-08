@@ -11,5 +11,6 @@ namespace prjtestAPI.Repositories.Interfaces
         Task<TUser?> GetByIdWithDepAsync(int userId);
         void Add(TUser user);
         void Update(TUser user);
+        Task<int> GetUserCountAsync();
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Course;
 using prjEvolutionAPI.Repositories.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace prjEvolutionAPI.Repositories
 {
@@ -121,18 +122,64 @@ namespace prjEvolutionAPI.Repositories
             return (items, totalCount);
         }
 
-        public async Task<IEnumerable<TCourse>> SearchAsync(string keyword)
+        public async Task<List<CourseDTO>> SearchAsync(string query)
         {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<CourseDTO>();
+
+            query = query.Trim();
+
             return await _context.TCourses
                 .AsNoTracking()
-                .Where(c => EF.Functions.Like(c.CourseTitle, $"%{keyword}%")
-                         || EF.Functions.Like(c.CourseDes ?? string.Empty, $"%{keyword}%"))
+                .Where(c => c.IsPublic
+                    && (
+                        c.CourseTitle.Contains(query)
+                        || (c.CourseDes != null && c.CourseDes.Contains(query))
+                    )
+                )
+                .Select(c => new CourseDTO
+                {
+                    CourseId = c.CourseId,
+                    CompanyId = c.CompanyId,
+                    CompanyName = c.Company.CompanyName,
+                    CourseTitle = c.CourseTitle,
+                    CourseDes = c.CourseDes,
+                    IsPublic = c.IsPublic,
+                    CoverImagePath = $"{_baseUrl}/{c.CoverImagePath.TrimStart('/')}",
+                    Price = c.Price
+                })
+                .OrderBy(c => c.CourseTitle)
                 .ToListAsync();
         }
 
         public void Update(TCourse entity)
         {
             _context.TCourses.Update(entity);
+        }
+
+        public async Task<List<string>> GetTitleSuggestionsAsync(string prefix, int maxResults = 10)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+                return new List<string>();
+
+            prefix = prefix.Trim();
+
+            return await _context.TCourses
+                .AsNoTracking()
+                .Where(c => c.IsPublic
+                            && c.CourseTitle.Contains(prefix))
+                .OrderBy(c => c.CourseTitle)
+                .Select(c => c.CourseTitle)
+                .Distinct()
+                .Take(maxResults)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetCourseCountAsync()
+        {
+            return await _context.TCourses
+                .AsNoTracking()
+                .CountAsync();
         }
     }
 }

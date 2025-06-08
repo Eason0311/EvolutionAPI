@@ -42,4 +42,11 @@ public class UserRepository : IUserRepository
            .Include(u => u.UserDepNavigation)
            .FirstOrDefaultAsync(u => u.UserId == userId);
     }
+
+    public async Task<int> GetUserCountAsync()
+    {
+        return await _context.TUsers
+                         .AsNoTracking()
+                         .CountAsync(u => u.IsEmailConfirmed);
+    }
 }

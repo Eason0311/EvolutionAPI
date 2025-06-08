@@ -11,6 +11,7 @@ public interface IUnitOfWork
     IEmpOrderRepository EmpOrder { get; }
     ICompOrderRepository CompOrder { get; }
     ICourseRepository Course { get; }
+    IQuizResultsRepository QuizResults { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }
