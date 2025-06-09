@@ -1,4 +1,5 @@
 ﻿using prjEvolutionAPI.Repositories.Interfaces;
+using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI;
 using prjtestAPI.Repositories.Interfaces;
 
@@ -13,6 +14,7 @@ public interface IUnitOfWork
     ICourseRepository Course { get; }
     IQuizResultsRepository QuizResults { get; }
     IHashTagListRepository HashTagList { get; }
+    IPublisherRepository Publisher { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

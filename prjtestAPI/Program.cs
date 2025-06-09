@@ -60,6 +60,7 @@ builder.Services.AddScoped<ICompOrderService, CompOrderService>();
 builder.Services.AddScoped<IEmpOrderService, EmpOrderService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
 
 // 7. µù¥U¦UºØ Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IEmpOrderRepository, EmpOrderRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IQuizResultsRepository, QuizResultsRepository>();
 builder.Services.AddScoped<IHashTagListRepository, HashTagListRepository>();
+builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,5 +1,8 @@
 ﻿using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
+using prjEvolutionAPI.Models.DTOs.Publisher;
+using prjEvolutionAPI.Repositories.Interfaces;
+using prjEvolutionAPI.Responses;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
@@ -13,17 +16,20 @@ namespace prjEvolutionAPI.Services
         private readonly IMailService _mailService;
         private readonly IUserActionTokenService _tokenService;
         private readonly IConfiguration _configuration;
+        private readonly ICompanyRepository _repo;
 
         public CompanyService(
             IUnitOfWork uow,
             IMailService mailService, 
             IConfiguration configuration, 
-            IUserActionTokenService tokenService)
+            IUserActionTokenService tokenService,
+            ICompanyRepository repo)
         {
             _uow = uow;
             _mailService = mailService;
             _tokenService = tokenService;
             _configuration = configuration;
+            _repo = repo;
         }
 
         public async Task<ServiceResult> CreateCompanyWithAdminAsync(RegisterCompanyDTO dto)
@@ -91,5 +97,10 @@ namespace prjEvolutionAPI.Services
                 return ServiceResult.Fail("建立公司與管理員時發生錯誤，請稍後再試");
             }
         }
+
+        public Task<PagedResult<CompanyListDTO>> GetClientsPagedAsync(
+        int start, int limit, string sortField, int sortOrder,
+        IDictionary<string, string> filters)
+        => _repo.GetPagedAsync(start, limit, sortField, sortOrder, filters);
     }
 }
