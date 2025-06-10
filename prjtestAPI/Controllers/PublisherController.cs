@@ -45,6 +45,7 @@ namespace prjEvolutionAPI.Controllers
 
             return Ok(ApiResponse<PagedResult<CompanyListDTO>>.SuccessResponse(paged));
         }
+
         [HttpPost]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<ActionResult<ApiResponse<CompanyListDTO>>> CreateClient([FromBody] RegisterCompanyDTO dto)

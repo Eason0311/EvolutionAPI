@@ -66,7 +66,7 @@ namespace prjEvolutionAPI.Services
                         DepName = "管理員",
                         CompanyId = newCompany.CompanyId
                     };
-                    _uow.DepList.Add(defaultDept);
+                    await _uow.DepList.AddAsync(defaultDept);
                     await _uow.CompleteAsync();
 
                     var adminUser = new TUser

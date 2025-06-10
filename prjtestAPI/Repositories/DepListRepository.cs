@@ -30,9 +30,9 @@ namespace prjEvolutionAPI.Repositories
                              d.DepName == depName
                          );
         }
-        public void Add(TDepList depList)
+        public async Task AddAsync(TDepList depList)
         {
-            _context.TDepLists.Add(depList);
+            await _context.TDepLists.AddAsync(depList);
         }
     }
 }

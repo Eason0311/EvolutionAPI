@@ -7,6 +7,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TDepList?> GetFirstOrDefaultAsync(string depName, int companyId);
         Task<TDepList?> GetByIdAsync(int UserDe);
         Task<IEnumerable<TDepList?>> GetByCompanyIdAsync(int companyId);
-        void Add(TDepList depList);
+        Task AddAsync(TDepList depList);
     }
 }

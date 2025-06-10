@@ -1,8 +1,11 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
+using prjEvolutionAPI.Models.DTOs.CompanyManage;
+using prjEvolutionAPI.Models.DTOs.Publisher;
 using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Repositories.Interfaces;
+using prjEvolutionAPI.Responses;
 using prjEvolutionAPI.Services;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
@@ -137,7 +140,7 @@ namespace prjtestAPI.Services
                             CompanyId = newEmployeeCompanyId,
                             DepName = dto.DepName
                         };
-                        _uow.DepList.Add(deptEntity);
+                        await _uow.DepList.AddAsync(deptEntity);
                         await _uow.CompleteAsync();
 
                         newEmployeeUserDep = deptEntity.DepId;
@@ -158,7 +161,7 @@ namespace prjtestAPI.Services
                         CompanyId = newEmployeeCompanyId,
                         CreatedAt = DateTime.UtcNow,
                         UserDep = newEmployeeUserDep,
-                        UserStatus = "Active",
+                        UserStatus = "Pending",
                     };
 
                     _uow.Users.Add(newUser);
@@ -204,7 +207,7 @@ namespace prjtestAPI.Services
                         CompanyId = user.CompanyId,
                         DepName = dto.Department
                     };
-                    _uow.DepList.Add(deptEntity);
+                    await _uow.DepList.AddAsync(deptEntity);
                     await _uow.CompleteAsync();
 
                     user.UserDep = deptEntity.DepId;
@@ -286,6 +289,53 @@ namespace prjtestAPI.Services
                 .Select(d => new DepListResponseDTO { DepName = d!.DepName })
                 .ToList();
             return dtoList;
+        }
+
+        public Task<PagedResult<EmployeesListDTO>> GetClientsPagedAsync(
+        int start, int limit, string sortField, int sortOrder,
+        IDictionary<string, string> filters, int companyId)
+        => _userRepo.GetPagedAsync(start, limit, sortField, sortOrder, filters , companyId);
+
+        public async Task<int> GetUserCompanyIdAsync(int userId)
+        {
+            return await _uow.Users.GetCompanyIdAsync(userId);
+        }
+
+        public async Task<TUser?> UpdateEmployeeAsync(EmployeeUpdateDTO dto)
+        {
+            // 1. 取出原始使用者實體
+            var user = await _uow.Users.GetByIdAsync(dto.UserId);
+            if (user == null)
+                return null;
+
+            // 2. 依部門名稱 + 公司 ID 嘗試取得已存在的部門
+            var department = await _uow.DepList
+                .GetFirstOrDefaultAsync(dto.UserDep,user.CompanyId);
+
+            // 3. 若不存在，建立新部門實體
+            if (department == null)
+            {
+                department = new TDepList
+                {
+                    DepName = dto.UserDep,
+                    CompanyId = user.CompanyId
+                };
+                // 如果你的 Repository 支援 AddAsync，優先用 AddAsync
+                await _uow.DepList.AddAsync(department);
+            }
+
+            // 4. 更新使用者欄位
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+            user.UserDep = department.DepId;   // 假設外鍵欄位是 UserDep
+
+            // 5. 標記更新（若為 EF Core，這行可省略，因為 ChangeTracker 已追蹤 user）
+            _uow.Users.Update(user);
+
+            // 6. 最後一次儲存、提交整個事務
+            await _uow.CompleteAsync();
+
+            return user;
         }
     }
 }

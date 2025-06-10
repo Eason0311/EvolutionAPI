@@ -1,4 +1,8 @@
-﻿using prjEvolutionAPI.Models;
+﻿using Azure;
+using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.CompanyManage;
+using prjEvolutionAPI.Models.DTOs.Publisher;
+using prjEvolutionAPI.Responses;
 using prjtestAPI.Models;
 using System.Threading.Tasks;
 
@@ -12,5 +16,13 @@ namespace prjtestAPI.Repositories.Interfaces
         void Add(TUser user);
         void Update(TUser user);
         Task<int> GetUserCountAsync();
+        Task<PagedResult<EmployeesListDTO>> GetPagedAsync(
+       int start,
+       int limit,
+       string sortField,
+       int sortOrder,
+       IDictionary<string, string> filters,
+       int companyId);
+        Task<int> GetCompanyIdAsync(int userId);
     }
 }
