@@ -126,7 +126,7 @@ namespace prjtestAPI.Controllers
                 // 密碼錯誤
                 if (!result.PasswordValid)
                 {
-                    user.FailedLoginCount = user.FailedLoginCount + 1;
+                    user.FailedLoginCount = user.FailedLoginCount ++;
 
                     if (user.FailedLoginCount >= 3)
                     {
@@ -159,6 +159,11 @@ namespace prjtestAPI.Controllers
                         : $"密碼錯誤，已失敗 {user.FailedLoginCount} 次";
 
                     return StatusCode(401, ApiResponse<string>.FailResponse(msg, null, 401));
+                }
+
+                if (!string.Equals(user.UserStatus, "Active", StringComparison.OrdinalIgnoreCase))
+                {
+                    return StatusCode(403, ApiResponse<string>.FailResponse("帳號未啟用或已被停權，請聯絡管理員", null, 403));
                 }
 
                 // 密碼正確 → 重置鎖定狀態

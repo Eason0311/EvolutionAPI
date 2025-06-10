@@ -48,7 +48,7 @@ namespace prjEvolutionAPI.Services
                 CompanyName = dto.CompanyName,
                 CompanyEmail = dto.Email,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true, // 假設預設新建公司為 active
+                IsActive = dto.IsActive,
             };
 
             string rawPassword = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -79,7 +79,7 @@ namespace prjEvolutionAPI.Services
                         CompanyId = newCompany.CompanyId,
                         CreatedAt = DateTime.UtcNow,
                         UserDep = defaultDept.DepId,
-                        UserStatus = "Active",
+                        UserStatus = "Pending",
                     };
 
                     _uow.Users.Add(adminUser);

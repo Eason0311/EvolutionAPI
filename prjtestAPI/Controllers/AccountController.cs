@@ -93,6 +93,11 @@ namespace prjEvolutionAPI.Controllers
             if (user == null)
                 return Ok(ApiResponse<string>.SuccessResponse("若此信箱存在，系統將寄出重設密碼信件", 200));
 
+            if (!user.IsEmailConfirmed || user.UserStatus == "Pending")
+            {
+                return Ok(ApiResponse<string>.SuccessResponse("帳號尚未啟用，請先完成初始密碼設定", 200));
+            }
+
             var tokenEntity = await _tokenService.CreateTokenAsync(user.UserId, UserActionTokenTypes.ResetPassword, TimeSpan.FromHours(1));
             var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
             var link = $"{baseUrl}/#/reset-password?token={tokenEntity.Token}";
@@ -154,6 +159,7 @@ namespace prjEvolutionAPI.Controllers
 
 
         [HttpPost("init-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> InitPassword([FromBody] InitPasswordDTO dto)
         {
             var tokenEntity = await _tokenService.GetValidTokenAsync(dto.Token, UserActionTokenTypes.InitPassword);
@@ -170,6 +176,7 @@ namespace prjEvolutionAPI.Controllers
 
             user.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
             user.IsEmailConfirmed = true;
+            user.UserStatus = "Active";
 
             await _tokenService.MarkTokenAsUsedAsync(tokenEntity);
             await _unitOfWork.CompleteAsync();
