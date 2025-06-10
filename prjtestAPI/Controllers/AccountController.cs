@@ -51,36 +51,6 @@ namespace prjEvolutionAPI.Controllers
             _userService = userService;
         }
 
-        [HttpPost("create-company")]
-        [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> CreateCompany([FromBody] RegisterCompanyDTO dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                var allErrors = ModelState
-                    .Where(x => x.Value.Errors.Count > 0)
-                    .SelectMany(kvp => kvp.Value.Errors.Select(e => e.ErrorMessage))
-                    .ToList();
-
-                var errorMsg = string.Join("；", allErrors);
-
-                return BadRequest(
-                ApiResponse<string>.FailResponse(errorMsg, null, 400)
-                );
-            }
-
-            var result = await _compenyService.CreateCompanyWithAdminAsync(dto);
-
-            if (!result.IsSuccess)
-                return BadRequest(
-                    ApiResponse<string>.FailResponse(result.ErrorMessage!, null, 400));
-
-            return Ok(ApiResponse<string>.SuccessResponse(
-                data: "公司與管理員已建立，初始密碼信件已寄出",
-                statusCode: 200
-            ));
-        }
-
         [HttpPost("create-employee")]
         [Authorize(Roles = "Admin")] // 限公司管理員可呼叫
         public async Task<IActionResult> CreateEmployee([FromBody] RegisterEmployeeDTO dto)

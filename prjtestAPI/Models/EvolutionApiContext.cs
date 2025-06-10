@@ -55,13 +55,13 @@ public partial class EvolutionApiContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=EvolutionAPI;Integrated Security=True;Encrypt=False;Trust Server Certificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=EvolutionApi;Integrated Security=True;Encrypt=False;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TCompOrder>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__tCompOrd__C3905BAF9EAC7E89");
+            entity.HasKey(e => e.OrderId).HasName("PK__tCompOrd__C3905BAF95EC81E0");
 
             entity.ToTable("tCompOrders");
 
@@ -87,7 +87,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCompany>(entity =>
         {
-            entity.HasKey(e => e.CompanyId).HasName("PK__tCompani__2D971C4C835FD43C");
+            entity.HasKey(e => e.CompanyId).HasName("PK__tCompani__2D971C4C308A1E5D");
 
             entity.ToTable("tCompanies");
 
@@ -103,7 +103,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourse>(entity =>
         {
-            entity.HasKey(e => e.CourseId).HasName("PK__tCourses__C92D7187505C7DB0");
+            entity.HasKey(e => e.CourseId).HasName("PK__tCourses__C92D71871DF6B131");
 
             entity.ToTable("tCourses");
 
@@ -120,7 +120,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseAccess>(entity =>
         {
-            entity.HasKey(e => e.CourseAccessId).HasName("PK__tCourseA__14EFAA2977A032E9");
+            entity.HasKey(e => e.CourseAccessId).HasName("PK__tCourseA__14EFAA29BA9E582E");
 
             entity.ToTable("tCourseAccess");
 
@@ -139,7 +139,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseAssignment>(entity =>
         {
-            entity.HasKey(e => e.AssignmentId).HasName("PK__tCourseA__32499E5759A914F8");
+            entity.HasKey(e => e.AssignmentId).HasName("PK__tCourseA__32499E57AAC3D621");
 
             entity.ToTable("tCourseAssignment");
 
@@ -166,7 +166,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseChapter>(entity =>
         {
-            entity.HasKey(e => e.ChapterId).HasName("PK__tCourseC__0893A34AA0CFB7BB");
+            entity.HasKey(e => e.ChapterId).HasName("PK__tCourseC__0893A34AE8FDED75");
 
             entity.ToTable("tCourseChapters");
 
@@ -182,7 +182,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseHashTag>(entity =>
         {
-            entity.HasKey(e => e.CourseHashTagId).HasName("PK__tCourseH__53192E568E860EE0");
+            entity.HasKey(e => e.CourseHashTagId).HasName("PK__tCourseH__53192E56B8891FD1");
 
             entity.ToTable("tCourseHashTag");
 
@@ -203,7 +203,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TDepList>(entity =>
         {
-            entity.HasKey(e => e.DepId).HasName("PK__tDepList__DB9CAA7F5C7C7AC7");
+            entity.HasKey(e => e.DepId).HasName("PK__tDepList__DB9CAA7FCF24D0A8");
 
             entity.ToTable("tDepList");
 
@@ -219,7 +219,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TEmpOrder>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__tEmpOrde__C3905BAF4DD09903");
+            entity.HasKey(e => e.OrderId).HasName("PK__tEmpOrde__C3905BAFAAEB7751");
 
             entity.ToTable("tEmpOrders");
 
@@ -245,7 +245,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<THashTagList>(entity =>
         {
-            entity.HasKey(e => e.TagId).HasName("PK__tHashTag__657CFA4C5F72B3B0");
+            entity.HasKey(e => e.TagId).HasName("PK__tHashTag__657CFA4C7F57F8FB");
 
             entity.ToTable("tHashTagList");
 
@@ -255,7 +255,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TOption>(entity =>
         {
-            entity.HasKey(e => e.OptionId).HasName("PK__tOptions__92C7A1DF51584DF2");
+            entity.HasKey(e => e.OptionId).HasName("PK__tOptions__92C7A1DF3422AF53");
 
             entity.ToTable("tOptions");
 
@@ -271,7 +271,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuestion>(entity =>
         {
-            entity.HasKey(e => e.QuestionId).HasName("PK__tQuestio__0DC06F8C643347E3");
+            entity.HasKey(e => e.QuestionId).HasName("PK__tQuestio__0DC06F8C423753C9");
 
             entity.ToTable("tQuestions");
 
@@ -286,7 +286,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuiz>(entity =>
         {
-            entity.HasKey(e => e.QuizId).HasName("PK__tQuizzes__8B42AE6E3A690A2D");
+            entity.HasKey(e => e.QuizId).HasName("PK__tQuizzes__8B42AE6E5725A410");
 
             entity.ToTable("tQuizzes");
 
@@ -302,7 +302,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuizAnswerDetail>(entity =>
         {
-            entity.HasKey(e => e.AnswerDetailId).HasName("PK__tQuizAns__F6D25813CB1F4A5D");
+            entity.HasKey(e => e.AnswerDetailId).HasName("PK__tQuizAns__F6D258134FC11D92");
 
             entity.ToTable("tQuizAnswerDetails");
 
@@ -329,7 +329,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuizResult>(entity =>
         {
-            entity.HasKey(e => e.ResultId).HasName("PK__tQuizRes__9769022856268291");
+            entity.HasKey(e => e.ResultId).HasName("PK__tQuizRes__9769022837A0226E");
 
             entity.ToTable("tQuizResults");
 
@@ -353,7 +353,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TRefreshToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__tRefresh__658FEEEA1EC87AA7");
+            entity.HasKey(e => e.TokenId).HasName("PK__tRefresh__658FEEEABBCD8C3A");
 
             entity.ToTable("tRefreshTokens");
 
@@ -361,9 +361,13 @@ public partial class EvolutionApiContext : DbContext
                 .HasDefaultValueSql("(getutcdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
-            entity.Property(e => e.IpAddress).HasMaxLength(45);
+            entity.Property(e => e.IpAddress)
+                .HasMaxLength(45)
+                .IsUnicode(false);
             entity.Property(e => e.Token).HasMaxLength(512);
-            entity.Property(e => e.UserAgent).HasMaxLength(512);
+            entity.Property(e => e.UserAgent)
+                .HasMaxLength(512)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.User).WithMany(p => p.TRefreshTokens)
                 .HasForeignKey(d => d.UserId)
@@ -373,7 +377,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TUser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__tUsers__1788CCAC525F4CEE");
+            entity.HasKey(e => e.UserId).HasName("PK__tUsers__1788CCAC4A62890B");
 
             entity.ToTable("tUsers");
 
@@ -403,7 +407,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TUserActionToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__tUserAct__658FEEEA0CA24F50");
+            entity.HasKey(e => e.TokenId).HasName("PK__tUserAct__658FEEEAE6029A5E");
 
             entity.ToTable("tUserActionTokens");
 
@@ -422,7 +426,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TVideo>(entity =>
         {
-            entity.HasKey(e => e.VideoId).HasName("PK__tVideos__BAE5124AECB36673");
+            entity.HasKey(e => e.VideoId).HasName("PK__tVideos__BAE5124A443E8482");
 
             entity.ToTable("tVideos");
 

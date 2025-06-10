@@ -19,6 +19,11 @@ namespace prjEvolutionAPI.Repositories
         {
             _context.TCompanies.Add(company);
         }
+        public void Update(TCompany company)
+        {
+            _context.TCompanies.Update(company);
+        }
+
         public async Task<TCompany?> GetByIdAsync(int companyId)
         {
             return await _context.TCompanies.FindAsync(companyId);

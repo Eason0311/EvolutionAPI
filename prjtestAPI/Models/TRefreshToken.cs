@@ -15,9 +15,9 @@ public partial class TRefreshToken
 
     public DateTime CreatedAt { get; set; }
 
-    public string? IpAddress { get; set; }
+    public string IpAddress { get; set; } = null!;
 
-    public string? UserAgent { get; set; }
+    public string UserAgent { get; set; } = null!;
 
     public bool IsRevoked { get; set; }
 

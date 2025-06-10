@@ -6,6 +6,7 @@ using prjEvolutionAPI.Responses;
 using prjEvolutionAPI.Services.Interfaces;
 using prjtestAPI.Constants;
 using prjtestAPI.Helpers;
+using prjtestAPI.Models;
 using prjtestAPI.Services.Interfaces;
 
 namespace prjEvolutionAPI.Services
@@ -32,21 +33,22 @@ namespace prjEvolutionAPI.Services
             _repo = repo;
         }
 
-        public async Task<ServiceResult> CreateCompanyWithAdminAsync(RegisterCompanyDTO dto)
+        public async Task<ServiceResult<TCompany>> CreateCompanyWithAdminAsync(RegisterCompanyDTO dto)
         {
             var existingCompany = await _uow.Company.GetByEmailAsync(dto.Email);
             if (existingCompany != null)
-                return ServiceResult.Fail($"聯絡 Email ({dto.Email}) 已被其他公司使用");
+                return ServiceResult<TCompany>.Fail($"聯絡 Email ({dto.Email}) 已被其他公司使用");
 
             var existUser = await _uow.Users.GetByEmailAsync(dto.Email);
             if (existUser != null)
-                return ServiceResult.Fail($"此 Email ({dto.Email}) 已被其他使用者註冊");
+                return ServiceResult<TCompany>.Fail($"此 Email ({dto.Email}) 已被其他使用者註冊");
 
             var newCompany = new TCompany
             {
                 CompanyName = dto.CompanyName,
                 CompanyEmail = dto.Email,
                 CreatedAt = DateTime.UtcNow,
+                IsActive = true, // 假設預設新建公司為 active
             };
 
             string rawPassword = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -84,23 +86,58 @@ namespace prjEvolutionAPI.Services
                     await _uow.CompleteAsync();
 
                     var tokenEntity = await _tokenService.CreateTokenAsync(adminUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(24));
-                    var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
+                    var baseUrl = _configuration["Frontend:BaseUrl"];
                     var link = $"{baseUrl}/#/init-password?token={tokenEntity.Token}";
                     var body = EmailTemplateBuilder.BuildInitPasswordEmail(adminUser.Username, link);
                     await _mailService.SendAsync(adminUser.Email, "【學習平台】帳號啟用與密碼設定", body);
                 });
 
-                return ServiceResult.Success();
+                return ServiceResult<TCompany>.Success(newCompany);
             }
             catch
             {
-                return ServiceResult.Fail("建立公司與管理員時發生錯誤，請稍後再試");
+                return ServiceResult<TCompany>.Fail("建立公司與管理員時發生錯誤，請稍後再試");
             }
         }
+
 
         public Task<PagedResult<CompanyListDTO>> GetClientsPagedAsync(
         int start, int limit, string sortField, int sortOrder,
         IDictionary<string, string> filters)
         => _repo.GetPagedAsync(start, limit, sortField, sortOrder, filters);
+
+        public async Task<TCompany> CreateCompanyAsync(CompanyCreateDTO dto)
+        {
+            // 1. DTO 映射
+            var entity = new TCompany
+            {
+                CompanyName = dto.CompanyName,
+                CompanyEmail = dto.CompanyEmail,
+                IsActive = dto.IsActive,
+                CreatedAt = DateTime.UtcNow
+            };
+
+           _uow.Company.Add(entity);
+
+            await _uow.CompleteAsync();
+
+            return entity;
+        }
+        public async Task<TCompany?> UpdateCompanyAsync(CompanyUpdateDTO dto)
+        {
+            // 1. 先取出原始 entity
+            var entity = await _uow.Company.GetByIdAsync(dto.CompanyId);
+            if (entity == null) return null;
+
+            // 2. 更新欄位
+            entity.CompanyName = dto.CompanyName;
+            entity.CompanyEmail = dto.CompanyEmail;
+            entity.IsActive = dto.IsActive;
+            _uow.Company.Update(entity);
+
+            await _uow.CompleteAsync();
+
+            return entity;
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace prjEvolutionAPI.Models.DTOs.Account
         [Required(ErrorMessage = "Email 為必填")]
         [EmailAddress(ErrorMessage = "請輸入有效的 Email 格式")]
         public string Email { get; set; } = null!;
+        public bool IsActive { get; set; }
     }
 }

@@ -105,19 +105,21 @@ namespace prjtestAPI.Services
             };
         }
 
-        public async Task<ServiceResult> CreateUserAsync(RegisterEmployeeDTO dto, int callerUserId)
+        public async Task<ServiceResult<TUser>> CreateUserAsync(RegisterEmployeeDTO dto, int callerUserId)
         {
             var caller = await _uow.Users.GetByIdAsync(callerUserId);
             if (caller == null)
-                return ServiceResult.Fail("找不到管理員帳號");
+                return ServiceResult<TUser>.Fail("找不到管理員帳號");
 
             var existUser = await _uow.Users.GetByEmailAsync(dto.Email);
             if (existUser != null)
-                return ServiceResult.Fail($"此 Email ({dto.Email}) 已被其他使用者註冊");
+                return ServiceResult<TUser>.Fail($"此 Email ({dto.Email}) 已被其他使用者註冊");
 
             int newEmployeeCompanyId = caller.CompanyId;
             string rawPassword = Guid.NewGuid().ToString("N").Substring(0, 8);
             string hashedPassword = PasswordHasher.Hash(rawPassword);
+
+            TUser newUser = null!;
 
             try
             {
@@ -146,7 +148,7 @@ namespace prjtestAPI.Services
                         newEmployeeUserDep = existDept.DepId;
                     }
 
-                    var newUser = new TUser
+                    newUser = new TUser
                     {
                         Username = dto.Username,
                         Email = dto.Email,
@@ -163,18 +165,17 @@ namespace prjtestAPI.Services
                     await _uow.CompleteAsync();
 
                     var tokenEntity = await _tokenService.CreateTokenAsync(newUser.UserId, UserActionTokenTypes.InitPassword, TimeSpan.FromHours(24));
-                    var baseUrl = _configuration["Frontend:BaseUrl"]; // 注入 IConfiguration
+                    var baseUrl = _configuration["Frontend:BaseUrl"];
                     var link = $"{baseUrl}/#/init-password?token={tokenEntity.Token}";
                     var body = EmailTemplateBuilder.BuildInitPasswordEmail(newUser.Username, link);
                     await _mailService.SendAsync(newUser.Email, "【學習平台】帳號啟用與密碼設定", body);
                 });
 
-                return ServiceResult.Success();
-
+                return ServiceResult<TUser>.Success(newUser);
             }
             catch
             {
-                return ServiceResult.Fail("建立員工帳號時發生錯誤，請稍後再試");
+                return ServiceResult<TUser>.Fail("建立員工帳號時發生錯誤，請稍後再試");
             }
         }
 
