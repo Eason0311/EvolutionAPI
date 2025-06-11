@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Course;
+using prjEvolutionAPI.Models.DTOs.CreateCourse;
+using prjEvolutionAPI.Repositories.Interfaces;
 
-namespace prjEvolutionAPI.Repositories.Interfaces
+namespace prjEvolutionAPI.Repositories
 {
     public class HashTagListRepository : IHashTagListRepository
     {
@@ -19,10 +21,23 @@ namespace prjEvolutionAPI.Repositories.Interfaces
                                  .Take(count)
                                  .Select(c => new HashTagListDTO
                                  {
-                                    TagId = c.TagId,
-                                    TagName = c.TagName
+                                     TagId = c.TagId,
+                                     TagName = c.TagName
                                  })
                                  .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ResHashTagDTO>> GetAllHashTagsAsync()
+        {
+            var hashTags = await _context.THashTagLists
+                .Select(n => new ResHashTagDTO
+                {
+                    HashTagId = n.TagId,
+                    HashTagName = n.TagName
+                })
+                .ToListAsync();
+
+            return hashTags;
         }
     }
 }

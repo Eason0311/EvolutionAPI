@@ -137,4 +137,11 @@ public class UserRepository : IUserRepository
     {
             return await _context.TUsers.Where(u => u.UserId == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
     }
+
+    public async Task<IEnumerable<TUser>> GetUsersByDepartmentsAsync(int[] depIds)
+    {
+        return await _context.TUsers
+            .Where(u => u.UserDep.HasValue && depIds.Contains(u.UserDep.Value))
+            .ToListAsync();
+    }
 }

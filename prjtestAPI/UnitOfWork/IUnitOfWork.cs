@@ -15,6 +15,12 @@ public interface IUnitOfWork
     IQuizResultsRepository QuizResults { get; }
     IHashTagListRepository HashTagList { get; }
     IPublisherRepository Publisher { get; }
+    ICreateCourseRepository CreateCourse { get; }
+    IChapterRepository Chapters { get; }
+    IVideoRepository Videos { get; }
+    ICourseHashTagRepository CourseHashTags { get; }
+    IHashTagListRepository HashTagLists { get; }
+    ICourseAccessRepository CourseAccesses { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

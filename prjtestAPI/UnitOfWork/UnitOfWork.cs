@@ -17,6 +17,11 @@ public class UnitOfWork : IUnitOfWork
     private readonly IQuizResultsRepository _quizResults;
     private readonly IHashTagListRepository _hashTagList;
     private readonly IPublisherRepository _publisher;
+    private readonly ICreateCourseRepository _createCourse;
+    private readonly IChapterRepository _chapter;
+    private readonly IVideoRepository _video;
+    private readonly ICourseHashTagRepository _courseHashTag;
+    private readonly ICourseAccessRepository _courseAccess;
 
     public UnitOfWork(
         EvolutionApiContext context,
@@ -29,7 +34,12 @@ public class UnitOfWork : IUnitOfWork
         ICourseRepository course,
         IQuizResultsRepository quizResults,
         IHashTagListRepository hashTagList,
-        IPublisherRepository publisher
+        IPublisherRepository publisher,
+        ICreateCourseRepository createCourse,
+        IChapterRepository chapter,
+        IVideoRepository video,
+        ICourseHashTagRepository courseHashTag,
+        ICourseAccessRepository courseAccess
         )
     {
         _context = context;
@@ -43,6 +53,11 @@ public class UnitOfWork : IUnitOfWork
         _quizResults = quizResults;
         _hashTagList = hashTagList;
         _publisher = publisher;
+        _video = video;
+        _courseHashTag = courseHashTag;
+        _courseAccess = courseAccess;
+        _createCourse = createCourse;
+        _chapter = chapter;
     }
 
     public IUserRepository Users => _users;
@@ -55,6 +70,12 @@ public class UnitOfWork : IUnitOfWork
     public IQuizResultsRepository QuizResults => _quizResults;
     public IHashTagListRepository HashTagList => _hashTagList;
     public IPublisherRepository Publisher => _publisher;
+    public ICreateCourseRepository CreateCourse => _createCourse;
+    public IChapterRepository Chapters => _chapter;
+    public IVideoRepository Videos => _video;
+    public ICourseHashTagRepository CourseHashTags => _courseHashTag;
+    public IHashTagListRepository HashTagLists => _hashTagList;
+    public ICourseAccessRepository CourseAccesses  => _courseAccess;
 
     public async Task<int> CompleteAsync()
     {

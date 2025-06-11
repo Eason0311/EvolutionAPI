@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.CreateCourse;
 using prjEvolutionAPI.Repositories.Interfaces;
 
 namespace prjEvolutionAPI.Repositories
@@ -33,6 +34,18 @@ namespace prjEvolutionAPI.Repositories
         public async Task AddAsync(TDepList depList)
         {
             await _context.TDepLists.AddAsync(depList);
+        }
+
+        public async Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync()
+        {
+            var departments = await _context.TDepLists
+                .Select(n => new ResDepListDTO
+                {
+                    DepId = n.DepId,
+                    DepName = n.DepName
+                })
+                .ToListAsync();
+            return departments;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using prjEvolutionAPI.Models;
+using prjEvolutionAPI.Models.DTOs.CreateCourse;
 
 namespace prjEvolutionAPI.Repositories.Interfaces
 {
@@ -8,5 +9,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TDepList?> GetByIdAsync(int UserDe);
         Task<IEnumerable<TDepList?>> GetByCompanyIdAsync(int companyId);
         Task AddAsync(TDepList depList);
+        Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync();
     }
 }

@@ -17,6 +17,8 @@ using prjEvolutionAPI.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using prjEvolutionAPI.Models;
+using Microsoft.AspNetCore.Http.Features;
+using prjEvolutionAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,11 +37,27 @@ builder.Services.AddDbContext<EvolutionApiContext>(options =>
 // 2-1. 註冊 記憶體快取
 builder.Services.AddMemoryCache();
 
+// 註冊 SignalR
+builder.Services.AddSignalR();
+
 // 3. CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+// 課程清除服務
+builder.Services.AddHostedService<SDraftCleanupService>();
+
+// 設定 FormOptions 以允許大檔案上傳
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024; // 10GB
+});
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 10L * 1024 * 1024 * 1024; // 10GB
 });
 
 // 4. 註冊 UnitOfWork
@@ -61,6 +79,11 @@ builder.Services.AddScoped<IEmpOrderService, EmpOrderService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
+builder.Services.AddScoped<IChapterService, SChapterService>();
+builder.Services.AddScoped<IVideoService, SVideoService>();
+builder.Services.AddScoped<ICourseHashTagService, SCourseHashTagService>();
+builder.Services.AddScoped<IDepListService, SDepListService>();
+builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>();
 
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -73,6 +96,10 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IQuizResultsRepository, QuizResultsRepository>();
 builder.Services.AddScoped<IHashTagListRepository, HashTagListRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
+builder.Services.AddScoped<IChapterRepository, RChapterRepository>();
+builder.Services.AddScoped<IVideoRepository, RVideoRepository>();
+builder.Services.AddScoped<ICourseHashTagRepository, RCourseHashTagRepository>();
+builder.Services.AddScoped<ICourseAccessRepository, RCourseAccessRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -179,6 +206,10 @@ var app = builder.Build();
 
 // 12. 使用 CORS
 app.UseCors("AllowAll");
+
+//SignalR套件
+//Install-Package Microsoft.AspNetCore.SignalR
+app.MapHub<CourseHub>("/courseHub");
 
 // 13. 使用自訂 Exception Handling Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
