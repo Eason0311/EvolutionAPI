@@ -43,6 +43,7 @@ namespace prjtestAPI.Middleware
             {
                 // 直接呼叫下一個中介軟體，不執行驗證
                 await _next(context);
+                return;
             }
             else
             {
