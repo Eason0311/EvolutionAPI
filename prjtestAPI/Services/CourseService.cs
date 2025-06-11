@@ -115,7 +115,7 @@ namespace prjEvolutionAPI.Services
             }
             try
             {
-                course.IsDraft = finalDTO.IsDraft; // 更新課程狀態為草稿或已完成
+                //course.IsDraft = finalDTO.IsDraft; // 更新課程狀態為草稿或已完成
                 this._uow.CreateCourse.Update(course);
                 await _uow.CompleteAsync();
                 return true;
@@ -175,8 +175,8 @@ namespace prjEvolutionAPI.Services
                     IsPublic = dto.IsPublic,
                     CoverImagePath = newcoverImagePath,
                     Price = dto.Price,
-                    IsDraft = true,
-                    CreatedAt = DateTime.UtcNow
+                    //IsDraft = true,
+                    //CreatedAt = DateTime.UtcNow
                 };
                 await hubContext.Clients.Client(ConnectionId).SendAsync("ReceiveProgress", new ProgressUpdate
                 {

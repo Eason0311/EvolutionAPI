@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace prjEvolutionAPI.Hubs
 {
     public class CourseHub : Hub
     {
         // 讓前端呼叫，取得自己的 ConnectionId
+        [AllowAnonymous]
         public string GetConnectionId()
         {
             return Context.ConnectionId;

@@ -39,6 +39,16 @@ namespace prjtestAPI.Middleware
 
             var endpoint = context.GetEndpoint();
             var allowAnonymous = endpoint?.Metadata.GetMetadata<IAllowAnonymous>();
+            if (context.Request.Path.StartsWithSegments("/courseHub"))
+            {
+                // 直接呼叫下一個中介軟體，不執行驗證
+                await _next(context);
+            }
+            else
+            {
+                // 一般執行驗證
+                //await app.UseAuthentication()(context);
+            }
 
             // ✅ 若是 AllowAnonymous 或根本沒有 endpoint（例如 /favicon.ico），就放行
             if (endpoint == null || allowAnonymous != null)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using prjEvolutionAPI.Hubs;
@@ -9,6 +10,7 @@ namespace prjEvolutionAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class ChapterController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -62,7 +64,7 @@ namespace prjEvolutionAPI.Controllers
             var result = await _chapterService.DeleteChapterAsync(id);
             if (!result) return NotFound("找不到要刪除的章節");
 
-            return StatusCode(200, ApiResponse<string>.SuccessResponse("章節已刪除"));
+            return StatusCode(200, ApiResponse<string>.SuccessResponse("章節已刪除",200));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using prjEvolutionAPI.Hubs;
@@ -9,6 +10,7 @@ namespace prjEvolutionAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize]
     public class CreateCourseController : ControllerBase
     {
         private readonly IHubContext<CourseHub> _hubContext;
@@ -83,7 +85,7 @@ namespace prjEvolutionAPI.Controllers
             try
             {
                 await _courseService.MarkCourseAsCompletedAsync(courseId, dto, _hubContext);
-                return Ok(ApiResponse<string>.SuccessResponse("課程已完成"));
+                return Ok(ApiResponse<string>.SuccessResponse("課程已完成",200));
             }
             catch (Exception ex)
             {
@@ -118,4 +120,4 @@ namespace prjEvolutionAPI.Controllers
         }
     }
 }
-}
+

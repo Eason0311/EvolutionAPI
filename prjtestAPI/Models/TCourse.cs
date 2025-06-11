@@ -19,6 +19,10 @@ public partial class TCourse
 
     public int Price { get; set; }
 
+    public bool IsDraft { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
     public virtual TCompany Company { get; set; } = null!;
 
     public virtual ICollection<TCompOrder> TCompOrders { get; set; } = new List<TCompOrder>();

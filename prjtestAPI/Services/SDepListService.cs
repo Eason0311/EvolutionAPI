@@ -12,7 +12,7 @@ namespace prjEvolutionAPI.Services
         }
         public async Task<IEnumerable<ResDepListDTO>> GetAllDepsAsync()
         {
-            return await _unitOfWork.DepLists.GetAllDepartmentsAsync();
+            return await _unitOfWork.DepList.GetAllDepartmentsAsync();
         }
     }
 }

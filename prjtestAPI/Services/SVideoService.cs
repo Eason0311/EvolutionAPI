@@ -44,7 +44,7 @@ namespace prjEvolutionAPI.Services
             var video = new TVideo
             {
                 ChapterId = (int)dto.ChapterId,
-                Title = dto.Title,
+                VideoTitle = dto.Title,
                 VideoUrl = newVideoFileName,  // 影片檔名先存入資料庫
             };
 
@@ -183,7 +183,7 @@ namespace prjEvolutionAPI.Services
                 // 產生新的檔名
                 string newVideoFileName = GetGuidFileName(dto.VideoFile);
                 video.VideoUrl = newVideoFileName; // 更新影片檔名
-                video.Title = dto.Title;
+                video.VideoTitle = dto.Title;
                 await hubContext.Clients.Client(ConnectionId).SendAsync("ReceiveProgress", new ProgressUpdate
                 {
                     Step = "Video:SavingToDb",
@@ -211,7 +211,7 @@ namespace prjEvolutionAPI.Services
             else
             {
                 // 如果沒有新的影片檔案，只更新標題
-                video.Title = dto.Title;
+                video.VideoTitle = dto.Title;
                 _unitOfWork.Videos.Update(video);
                 await _unitOfWork.CompleteAsync();
                 await hubContext.Clients.Client(ConnectionId).SendAsync("ReceiveProgress", new ProgressUpdate

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+ï»¿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,7 +22,7 @@ using prjEvolutionAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. ³]©w¤é»x
+// 1. è¨­å®šæ—¥èªŒ
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();
@@ -30,27 +30,31 @@ builder.Services.AddLogging(logging =>
     logging.SetMinimumLevel(LogLevel.Information);
 });
 
-// 2. µù¥U DbContext
+// 2. è¨»å†Š DbContext
 builder.Services.AddDbContext<EvolutionApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2-1. µù¥U °O¾ĞÅé§Ö¨ú
+// 2-1. è¨»å†Š è¨˜æ†¶é«”å¿«å–
 builder.Services.AddMemoryCache();
 
-// µù¥U SignalR
+// è¨»å†Š SignalR
 builder.Services.AddSignalR();
 
 // 3. CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins("http://localhost:4200") // æ˜ç¢ºæŒ‡å®š
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()); // æ­é…æ†‘è­‰å‚³éï¼ˆå‰ç«¯ withCredentials: trueï¼‰
 });
 
-// ½Òµ{²M°£ªA°È
+
+// èª²ç¨‹æ¸…é™¤æœå‹™
 builder.Services.AddHostedService<SDraftCleanupService>();
 
-// ³]©w FormOptions ¥H¤¹³\¤jÀÉ®×¤W¶Ç
+// è¨­å®š FormOptions ä»¥å…è¨±å¤§æª”æ¡ˆä¸Šå‚³
 builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024; // 10GB
@@ -60,13 +64,13 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     serverOptions.Limits.MaxRequestBodySize = 10L * 1024 * 1024 * 1024; // 10GB
 });
 
-// 4. µù¥U UnitOfWork
+// 4. è¨»å†Š UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// 5. µù¥U JwtSettings
+// 5. è¨»å†Š JwtSettings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-// 6. µù¥U¦UºØ Service / Helper
+// 6. è¨»å†Šå„ç¨® Service / Helper
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
@@ -85,7 +89,7 @@ builder.Services.AddScoped<ICourseHashTagService, SCourseHashTagService>();
 builder.Services.AddScoped<IDepListService, SDepListService>();
 builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>();
 
-// 7. µù¥U¦UºØ Repository
+// 7. è¨»å†Šå„ç¨® Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -100,6 +104,8 @@ builder.Services.AddScoped<IChapterRepository, RChapterRepository>();
 builder.Services.AddScoped<IVideoRepository, RVideoRepository>();
 builder.Services.AddScoped<ICourseHashTagRepository, RCourseHashTagRepository>();
 builder.Services.AddScoped<ICourseAccessRepository, RCourseAccessRepository>();
+builder.Services.AddScoped<ICreateCourseRepository, RCreateCourseRepository>();
+
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -128,37 +134,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 context.Response.ContentType = "application/json; charset=utf-8";
 
-                // 1. ¨ú±o¥Ø«e½Ğ¨Dªº Endpoint
+                // 1. å–å¾—ç›®å‰è«‹æ±‚çš„ Endpoint
                 var endpoint = context.HttpContext.GetEndpoint();
-                // 2. ±q Metadata ¨ú¥X [Authorize] ¤Wªº Roles
+                // 2. å¾ Metadata å–å‡º [Authorize] ä¸Šçš„ Roles
                 var authorizeAttrs = endpoint?.Metadata.GetOrderedMetadata<AuthorizeAttribute>();
                 string requiredRoles = "";
                 if (authorizeAttrs != null && authorizeAttrs.Count > 0)
                 {
-                    // ¥i¯à¦s¦b¦h­Ó [Authorize]¡A³oÃä¦X¨Ö¥¦­Ìªº Roles Äİ©Ê
+                    // å¯èƒ½å­˜åœ¨å¤šå€‹ [Authorize]ï¼Œé€™é‚Šåˆä½µå®ƒå€‘çš„ Roles å±¬æ€§
                     requiredRoles = string.Join(",",
                         authorizeAttrs
                             .Where(a => !string.IsNullOrEmpty(a.Roles))
                             .Select(a => a.Roles));
                 }
 
-                // 3. ¨ú±o·í«e¨Ï¥ÎªÌªº¨¤¦â (¦pªG¦³¦h­Ó¡A¥H³r¸¹¤À¹j)
+                // 3. å–å¾—ç•¶å‰ä½¿ç”¨è€…çš„è§’è‰² (å¦‚æœæœ‰å¤šå€‹ï¼Œä»¥é€—è™Ÿåˆ†éš”)
                 var userRoles = context.HttpContext.User?.FindAll(ClaimTypes.Role)
                                    .Select(c => c.Value)
                                    .ToList()
                                ?? new List<string>();
                 string currentRoles = userRoles.Count > 0
                     ? string.Join(",", userRoles)
-                    : "¥¼µn¤J©Î¨¤¦â¥¼ª¾";
+                    : "æœªç™»å…¥æˆ–è§’è‰²æœªçŸ¥";
 
-                // 4. ²Õ¥X­n¦^¶Çªº JSON ¤º®e
+                // 4. çµ„å‡ºè¦å›å‚³çš„ JSON å…§å®¹
                 var payload = new
                 {
                     success = false,
-                    // ¦pªG endpoint ¨S«ü©w Roles¡A´NÅã¥Ü¡uµLªk¦s¨ú¡vªº³q¥Î°T®§
+                    // å¦‚æœ endpoint æ²’æŒ‡å®š Rolesï¼Œå°±é¡¯ç¤ºã€Œç„¡æ³•å­˜å–ã€çš„é€šç”¨è¨Šæ¯
                     error = string.IsNullOrEmpty(requiredRoles)
-                        ? "±z¨S¦³¦s¨ú¦¹¸ê·½ªºÅv­­"
-                        : $"¦¹¥\¯à»İ­n {requiredRoles} Åv­­¡A±z¥Ø«e¨­¤À¬O {currentRoles}"
+                        ? "æ‚¨æ²’æœ‰å­˜å–æ­¤è³‡æºçš„æ¬Šé™"
+                        : $"æ­¤åŠŸèƒ½éœ€è¦ {requiredRoles} æ¬Šé™ï¼Œæ‚¨ç›®å‰èº«åˆ†æ˜¯ {currentRoles}"
                 };
                 var json = JsonSerializer.Serialize(payload);
                 await context.Response.WriteAsync(json);
@@ -166,20 +172,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// 9. ±ÂÅv (Authorization)
+// 9. æˆæ¬Š (Authorization)
 builder.Services.AddAuthorization();
 
-// 10. ¥[¤J Controllers
+// 10. åŠ å…¥ Controllers
 builder.Services.AddControllers();
 
-// 11. Swagger ³]©w
+// 11. Swagger è¨­å®š
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT ±ÂÅv¼ĞÀY®æ¦¡¡GBearer {token}",
+        Description = "JWT æˆæ¬Šæ¨™é ­æ ¼å¼ï¼šBearer {token}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -204,36 +210,36 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// 12. ¨Ï¥Î CORS
-app.UseCors("AllowAll");
+// 12. ä½¿ç”¨ CORS
+app.UseCors("AllowFrontend");
 
-//SignalR®M¥ó
+//SignalRå¥—ä»¶
 //Install-Package Microsoft.AspNetCore.SignalR
 app.MapHub<CourseHub>("/courseHub");
 
-// 13. ¨Ï¥Î¦Û­q Exception Handling Middleware
+// 13. ä½¿ç”¨è‡ªè¨‚ Exception Handling Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseStatusCodePages(); // ´ú¸Õ¶¥¬qÅã¥Ü 401, 403 µ¥ª¬ºA½X
+    app.UseStatusCodePages(); // æ¸¬è©¦éšæ®µé¡¯ç¤º 401, 403 ç­‰ç‹€æ…‹ç¢¼
 }
 
-// 14. HTTPS ­«¾É¦V
+// 14. HTTPS é‡å°å‘
 app.UseHttpsRedirection();
 
-// 15. ¨­¥÷ÅçÃÒ (Authentication)
+// 15. èº«ä»½é©—è­‰ (Authentication)
 app.UseAuthentication();
 
-// 16. ¦Û­q JwtAuthorizationMiddleware (­Y¦³¥²­n)
+// 16. è‡ªè¨‚ JwtAuthorizationMiddleware (è‹¥æœ‰å¿…è¦)
 app.UseMiddleware<JwtAuthorizationMiddleware>();
 
-// 17. ±ÂÅv (Authorization)
+// 17. æˆæ¬Š (Authorization)
 app.UseAuthorization();
 
-// 18. ±Ò¥ÎÀRºAÀÉ®×ªA°È
+// 18. å•Ÿç”¨éœæ…‹æª”æ¡ˆæœå‹™
 app.UseStaticFiles();
 
 // 19. Map Controllers

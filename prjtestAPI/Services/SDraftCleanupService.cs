@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using prjEvolutionAPI.Models;
 
 namespace prjEvolutionAPI.Services
 {
@@ -23,7 +25,7 @@ namespace prjEvolutionAPI.Services
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
-                        var context = scope.ServiceProvider.GetRequiredService<DbTestCourseContext>();
+                        var context = scope.ServiceProvider.GetRequiredService<EvolutionApiContext>();
                         var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
                         var draftCourses = await context.TCourses
