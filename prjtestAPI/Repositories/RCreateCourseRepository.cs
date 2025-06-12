@@ -37,5 +37,13 @@ namespace prjEvolutionAPI.Repositories
         {
             _context.TCourses.Remove(course);
         }
+        public async Task<List<TCourseChapter>> GetChaptersWithVideosByCourseIdAsync(int courseId)
+        {
+            return await _context.TCourseChapters
+                .Where(c => c.CourseId == courseId)
+                .Include(c => c.TVideos)
+                .OrderBy(c => c.ChapterId)
+                .ToListAsync();
+        }
     }
 }

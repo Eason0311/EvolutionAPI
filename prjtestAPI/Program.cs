@@ -87,7 +87,8 @@ builder.Services.AddScoped<IChapterService, SChapterService>();
 builder.Services.AddScoped<IVideoService, SVideoService>();
 builder.Services.AddScoped<ICourseHashTagService, SCourseHashTagService>();
 builder.Services.AddScoped<IDepListService, SDepListService>();
-builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>();
+builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>(); 
+builder.Services.AddScoped<IHashTagListService, SHashTagListService>();
 
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();

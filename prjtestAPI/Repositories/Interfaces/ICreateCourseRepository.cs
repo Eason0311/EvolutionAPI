@@ -9,5 +9,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TCourse> AddAsync(TCourse course);
         void Update(TCourse course);
         void Delete(TCourse course);
+        Task<List<TCourseChapter>> GetChaptersWithVideosByCourseIdAsync(int courseId);
     }
 }
