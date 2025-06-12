@@ -24,7 +24,7 @@ namespace prjEvolutionAPI.Controllers
             _userService = userService;
         }
         [HttpGet("employeesList")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         //[AllowAnonymous]
         public async Task<ActionResult<ApiResponse<PagedResult<EmployeesListDTO>>>> GetPagedResult(
         [FromQuery] int start,
@@ -61,7 +61,7 @@ namespace prjEvolutionAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<ApiResponse<EmployeesListDTO>>> CreateEmployee([FromBody] RegisterEmployeeDTO dto)
         {
             if (!ModelState.IsValid)
@@ -114,7 +114,7 @@ namespace prjEvolutionAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<ApiResponse<EmployeesListDTO>>> UpdateEmployee(int id, [FromBody] EmployeeUpdateDTO dto)
         {
             if (id != dto.UserId)
@@ -133,6 +133,29 @@ namespace prjEvolutionAPI.Controllers
                 Email = updated.Email,
                 UserStatus = updated.UserStatus,
                 UserDep = updated.UserDepNavigation.DepName,
+            };
+            return Ok(ApiResponse<EmployeesListDTO>.SuccessResponse(resultDto));
+        }
+
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<ActionResult<ApiResponse<EmployeesListDTO>>> UpdateStatus(int id,
+    [FromBody] EmployeeStatusUpdateDTO dto)
+        {
+            if (id != dto.UserId)
+                return BadRequest(ApiResponse<EmployeesListDTO>.FailResponse("路徑參數與 Payload 不符"));
+
+            var updated = await _userService.UpdateStatusAsync(dto.UserId, dto.UserStatus);
+            if (updated == null)
+                return NotFound(ApiResponse<EmployeesListDTO>.FailResponse("找不到使用者"));
+
+            var resultDto = new EmployeesListDTO
+            {
+                UserId = updated.UserId,
+                Username = updated.Username,
+                Email = updated.Email,
+                UserDep = updated.UserDepNavigation.DepName,
+                UserStatus = updated.UserStatus
             };
             return Ok(ApiResponse<EmployeesListDTO>.SuccessResponse(resultDto));
         }

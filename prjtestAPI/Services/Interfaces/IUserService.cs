@@ -25,5 +25,6 @@ namespace prjtestAPI.Services.Interfaces
         int companyId);
         Task<int> GetUserCompanyIdAsync(int userId);
         Task<TUser?> UpdateEmployeeAsync(EmployeeUpdateDTO dto);
+        Task<TUser?> UpdateStatusAsync(int userId, string newStatus);
     }
 }

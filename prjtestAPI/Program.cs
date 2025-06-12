@@ -19,6 +19,7 @@ using System.Text.Json;
 using prjEvolutionAPI.Models;
 using Microsoft.AspNetCore.Http.Features;
 using prjEvolutionAPI.Hubs;
+using prjEvolutionAPI.Models.DTOs.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,11 +68,13 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 // 4. 註冊 UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// 5. 註冊 JwtSettings
+// 5. 註冊 JwtSettings , LinePay 相關設定的 Configure
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<LinePayOptions>(builder.Configuration.GetSection("LinePay"));
 
 // 6. 註冊各種 Service / Helper
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddSingleton<ILinePayService, LinePayService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUserActionTokenService, UserActionTokenService>();

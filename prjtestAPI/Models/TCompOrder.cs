@@ -20,4 +20,6 @@ public partial class TCompOrder
     public virtual TCompany BuyerCompany { get; set; } = null!;
 
     public virtual TCourse Course { get; set; } = null!;
+
+    public virtual ICollection<TPaymentDetail> TPaymentDetails { get; set; } = new List<TPaymentDetail>();
 }

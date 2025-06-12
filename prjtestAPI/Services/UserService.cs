@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
 using prjEvolutionAPI.Models.DTOs.CompanyManage;
@@ -334,6 +335,23 @@ namespace prjtestAPI.Services
 
             // 6. 最後一次儲存、提交整個事務
             await _uow.CompleteAsync();
+
+            return user;
+        }
+
+        public async Task<TUser?> UpdateStatusAsync(int userId, string newStatus)
+        {
+            // 1. 先撈到 user 本體
+            var user = await _uow.Users.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            // 2. 更新狀態
+            user.UserStatus = newStatus;
+            await _uow.CompleteAsync();
+
+            // 3. 再去撈 department entity
+            var dep = await _uow.DepList.GetByIdAsync(user.UserDep);
+            user.UserDepNavigation = dep;   // 把 navigation property 塞回去
 
             return user;
         }
