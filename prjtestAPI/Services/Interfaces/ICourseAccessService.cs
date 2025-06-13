@@ -4,6 +4,6 @@ namespace prjEvolutionAPI.Services.Interfaces
 {
     public interface ICourseAccessService
     {
-        Task<bool> CreateCourseAccessAsync(VCourseAccessDTO dto);
+        Task<bool> CreateCourseAccessAsync(VCourseAccessDTO dto,int userId);
     }
 }

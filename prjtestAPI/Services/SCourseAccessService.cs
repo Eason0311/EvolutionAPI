@@ -11,14 +11,14 @@ namespace prjEvolutionAPI.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<bool> CreateCourseAccessAsync(VCourseAccessDTO dto)
+        public async Task<bool> CreateCourseAccessAsync(VCourseAccessDTO dto, int userId)
         {
             if (dto == null || dto.DepIds == null || dto.DepIds.Length == 0)
             {
                 return false;
             }
 
-            var users = await _unitOfWork.Users.GetUsersByDepartmentsAsync(dto.DepIds);
+            var users = await _unitOfWork.Users.GetUsersByDepartmentsAsync(dto.DepIds, userId);
 
             if (users == null || !users.Any())
             {
