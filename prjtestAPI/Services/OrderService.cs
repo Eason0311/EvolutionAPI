@@ -106,5 +106,36 @@ namespace prjEvolutionAPI.Services
             else
                 await UpdateEmpOrderPaidAsync(orderId, true);
         }
+
+        public async Task<int> CreateCompOrderAsync(TCompOrder order)
+        {
+            await _uow.Repository<TCompOrder>().AddAsync(order);
+            await _uow.CompleteAsync();
+            return order.OrderId;
+        }
+
+        public async Task<int> CreateEmpOrderAsync(TEmpOrder order)
+        {
+            await _uow.Repository<TEmpOrder>().AddAsync(order);
+            await _uow.CompleteAsync();
+            return order.OrderId;
+        }
+
+        public async Task MarkOrdersPaidByPaymentIdAsync(int paymentId)
+        {
+            var details = await _uow.PaymentDetails.GetWhereAsync(d => d.PaymentId == paymentId);
+
+            foreach (var detail in details)
+            {
+                if (detail.CompOrderId.HasValue)
+                {
+                    await MarkOrderPaidAsync(detail.CompOrderId.Value, isCompany: true);
+                }
+                else if (detail.EmpOrderId.HasValue)
+                {
+                    await MarkOrderPaidAsync(detail.EmpOrderId.Value, isCompany: false);
+                }
+            }
+        }
     }
 }

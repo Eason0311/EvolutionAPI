@@ -22,5 +22,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         // 刪除
         void Remove(T entity);
         void AddRange(IEnumerable<T> entity);
+        Task<List<T>> GetWhereAsync(Expression<Func<T, bool>> predicate);
     }
 }

@@ -37,5 +37,10 @@ namespace prjEvolutionAPI.Repositories
 
         public void AddRange(IEnumerable<T> entity) =>
         _dbSet.AddRange(entity);
+
+        public async Task<List<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>().Where(predicate).ToListAsync();
+        }
     }
 }

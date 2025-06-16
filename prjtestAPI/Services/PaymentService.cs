@@ -78,5 +78,18 @@ namespace prjEvolutionAPI.Services
             _uow.Payments.Update(payment);
             await _uow.CompleteAsync();
         }
+
+        public async Task MarkPaymentAsPaidAsync(long transactionId)
+        {
+            var payment = await GetByTransactionIdAsync(transactionId);
+            if (payment == null) return;
+
+            payment.Status = "Paid";
+            payment.PaidAt = DateTime.UtcNow;
+
+            _uow.Payments.Update(payment);
+            await _uow.CompleteAsync();
+        }
+
     }
 }

@@ -12,5 +12,8 @@ namespace prjEvolutionAPI.Services.Interfaces
         Task<int[]> CreateCompOrdersAsync(IEnumerable<CreateCompOrderDto> dtos);
         Task<int[]> CreateEmpOrdersAsync(IEnumerable<CreateEmpOrderDto> dtos);
         Task MarkOrderPaidAsync(int orderId, bool isCompany);
+        Task<int> CreateCompOrderAsync(TCompOrder order);
+        Task<int> CreateEmpOrderAsync(TEmpOrder order);
+        Task MarkOrdersPaidByPaymentIdAsync(int paymentId);
     }
 }
