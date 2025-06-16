@@ -67,6 +67,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 
 // 4. 註冊 UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // 5. 註冊 JwtSettings , LinePay 相關設定的 Configure
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
@@ -91,6 +92,8 @@ builder.Services.AddScoped<IVideoService, SVideoService>();
 builder.Services.AddScoped<ICourseHashTagService, SCourseHashTagService>();
 builder.Services.AddScoped<IDepListService, SDepListService>();
 builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -108,6 +111,7 @@ builder.Services.AddScoped<IVideoRepository, RVideoRepository>();
 builder.Services.AddScoped<ICourseHashTagRepository, RCourseHashTagRepository>();
 builder.Services.AddScoped<ICourseAccessRepository, RCourseAccessRepository>();
 builder.Services.AddScoped<ICreateCourseRepository, RCreateCourseRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 
 // 8. JWT Authentication

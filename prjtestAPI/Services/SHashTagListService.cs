@@ -12,7 +12,7 @@ namespace prjEvolutionAPI.Services
         }
         public async Task<IEnumerable<ResHashTagDTO>> GetAllHashTagsAsync()
         {
-            return await _unitOfWork.HashTagLists.GetAllHashTagsAsync();
+            return await _unitOfWork.HashTagList.GetAllHashTagsAsync();
         }
     }
 }

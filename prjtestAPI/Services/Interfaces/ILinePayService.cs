@@ -8,7 +8,9 @@ namespace prjEvolutionAPI.Services.Interfaces
         Task<LinePayRequestResponse> RequestPaymentAsync(
             decimal amount,
             string orderId,
-            string productName);
+            string productName,
+            string confirmUrl,
+            string cancelUrl);
 
         /// 使用 transactionId 與金額向 LINE Pay 呼叫「付款確認」API。
         Task<LinePayConfirmResponse> ConfirmPaymentAsync(
