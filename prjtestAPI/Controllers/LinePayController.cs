@@ -11,6 +11,8 @@ using prjEvolutionAPI.Models.DTOs.Course;
 using prjEvolutionAPI.Models.DTOs.LinePay;
 using prjEvolutionAPI.Responses;
 using prjEvolutionAPI.Services.Interfaces;
+using prjtestAPI.Helpers;
+using prjtestAPI.Services;
 using prjtestAPI.Services.Interfaces;
 
 namespace prjEvolutionAPI.Controllers
@@ -19,13 +21,17 @@ namespace prjEvolutionAPI.Controllers
     [Route("api/linepay")]
     public class LinePayController : ControllerBase
     {
+        private readonly ICompanyService _companyService;
         private readonly IUserService _userService;
         private readonly ILinePayService _linePay;
         private readonly IPaymentService _paymentSvc;
         private readonly IOrderService _orderSvc;
         private readonly LinePayOptions _opt;
+        private readonly IMailService _mailService;
 
         public LinePayController(
+            ICompanyService companyService,
+            IMailService mailService,
             IUserService userService,
             IOptions<LinePayOptions> opts,
             ILinePayService linePay,
@@ -37,6 +43,8 @@ namespace prjEvolutionAPI.Controllers
             _paymentSvc = paymentSvc;
             _orderSvc = orderSvc;
             _userService = userService;
+            _mailService = mailService;
+            _companyService = companyService;
         }
 
         [HttpPost("request")]
@@ -69,7 +77,7 @@ namespace prjEvolutionAPI.Controllers
                         CourseId = item.CourseId,
                         OrderDate = DateTime.UtcNow,
                         Amount = item.Price,
-                        IsPaid = false
+                        IsPaid = false,
                     };
                     int orderId = await _orderSvc.CreateCompOrderAsync(order);
                     orderDetails.Add((compOrderId: orderId, empOrderId: null));
@@ -122,38 +130,91 @@ namespace prjEvolutionAPI.Controllers
         [AllowAnonymous]
         [HttpGet("confirm")]
         public async Task<IActionResult> Confirm(
-            [FromQuery] string transactionId,
-            [FromQuery] bool isCompany)
+        [FromQuery] string transactionId,
+        [FromQuery] string orderId)
         {
-            // 1. 轉型 transactionId
+            // 1. 驗證 transactionId
             if (!long.TryParse(transactionId, out long tid))
                 return BadRequest("交易編號格式錯誤");
 
-            // 2. 根據 transactionId 取付款資料
-            var payment = await _paymentSvc.GetByTransactionIdAsync(tid);
-            if (payment == null)
-                return NotFound("找不到此交易紀錄");
-
-            // 3. 呼叫 LINE Pay 確認 API
-            var result = await _linePay.ConfirmPaymentAsync(
-            transactionId: transactionId,
-             amount: payment.Amount
-            );
-
-            // 4. 若付款成功
-            if (result.ReturnCode == "0000")
+            // 2. 驗證 orderId 格式 (EV-XXXXXXXX)
+            if (!orderId.StartsWith("EV-") ||
+                !int.TryParse(orderId["EV-".Length..], out int paymentId))
             {
-                await _paymentSvc.MarkPaymentAsPaidAsync(tid);
-                await _orderSvc.MarkOrdersPaidByPaymentIdAsync(payment.PaymentId);
+                return BadRequest("無效的訂單編號");
+            }
 
-                var frontendSuccessUrl = $"http://localhost:4200/#/payment/success?orderId={payment.PaymentId}";
-                return Redirect(frontendSuccessUrl);
+            // 3. 取得 TPayment
+            var payment = await _paymentSvc.GetByIdAsync(paymentId);
+            if (payment == null)
+                return NotFound("找不到此付款紀錄");
+
+            // 4. 呼叫 LINE Pay 確認付款
+            decimal paidAmount = payment.Amount;
+            var linePayResult = await _linePay.ConfirmPaymentAsync(transactionId, paidAmount);
+            if (linePayResult.ReturnCode != "0000")
+                return Redirect($"{_opt.ConfirmUrl}/payment/fail?orderId={orderId}");
+
+            // 5. 更新付款狀態
+            await _paymentSvc.MarkPaymentAsPaidAsync(tid);
+
+            // 6. 撈出所有 PaymentDetail，判斷公司 / 員工
+            var details = await _paymentSvc.GetPaymentDetailsAsync(paymentId);
+            var first = details.FirstOrDefault()
+                          ?? throw new InvalidOperationException("此付款沒有任何訂單明細");
+
+            bool isCompany = first.CompOrderId.HasValue;
+
+            // 7. 取得收件人信箱與顯示名稱
+            string userEmail, displayName;
+            if (isCompany)
+            {
+                var compOrder = await _orderSvc.GetCompOrderByIdAsync(first.CompOrderId!.Value);
+                if (compOrder == null)
+                    return NotFound("找不到對應的公司訂單");
+
+                var comp = await _companyService.GetByIdAsync(compOrder.BuyerCompanyId);
+                if (comp == null)
+                    return NotFound("找不到對應的公司資料");
+
+                userEmail = comp.CompanyEmail;
+                displayName = compOrder.BuyerCompany.CompanyName;
             }
             else
             {
-                var frontendFailUrl = $"http://localhost:4200/#/payment/fail?orderId={payment.PaymentId}";
-                return Redirect(frontendFailUrl);
+                var empOrder = await _orderSvc.GetEmpOrderByIdAsync(first.EmpOrderId!.Value);
+                if (empOrder == null)
+                    return NotFound("找不到對應的員工訂單");
+
+                var user = await _userService.GetByIdAsync(empOrder.BuyerUserId);
+                if (user == null)
+                    return NotFound("找不到對應的使用者");
+
+                userEmail = user.Email;
+                displayName = user.Username;
             }
+
+            // 8. 產生郵件內容
+            var itemDetails = await _orderSvc.GetOrderDetailsAsync(paymentId);
+            var htmlBody = EmailTemplateBuilder.BuildOrderDetailEmail(
+                displayName,
+                transactionId,
+                paymentId,
+                itemDetails,
+                paidAmount,
+                payment.PaidAt ?? DateTime.Now);
+
+            // 9. 寄出消費明細郵件
+            await _mailService.SendAsync(
+                userEmail,
+                $"您的訂單明細 (#{paymentId})",
+                htmlBody);
+
+            // 10. 更新所有下屬訂單為已付款
+            await _orderSvc.MarkOrdersPaidByPaymentIdAsync(paymentId);
+
+            // 11. 導回前端成功頁
+            return Redirect($"http://localhost:4200/#/payment/success?orderId={payment.PaymentId}");
         }
     }
 }

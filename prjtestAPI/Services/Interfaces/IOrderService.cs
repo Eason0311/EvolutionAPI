@@ -16,5 +16,7 @@ namespace prjEvolutionAPI.Services.Interfaces
         Task<int> CreateEmpOrderAsync(TEmpOrder order);
         Task MarkOrdersPaidByPaymentIdAsync(int paymentId);
         Task<int[]> GetUserOwnCourse(int userId);
+        Task<IEnumerable<(string ProductName, int Quantity, decimal UnitPrice, decimal TotalPrice)>>
+            GetOrderDetailsAsync(int paymentId);
     }
 }

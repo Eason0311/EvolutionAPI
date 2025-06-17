@@ -14,5 +14,6 @@ namespace prjEvolutionAPI.Services.Interfaces
         Task UpdateStatusAsync(int paymentId, string status);
         Task UpdateTransactionAsync(int paymentId, long transactionId);
         Task MarkPaymentAsPaidAsync(long transactionId);
+        Task<IEnumerable<TPaymentDetail>> GetPaymentDetailsAsync(int paymentId);
     }
 }

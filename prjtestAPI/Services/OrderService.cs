@@ -148,5 +148,49 @@ namespace prjEvolutionAPI.Services
 
             return courseIds;
         }
+
+        public async Task<IEnumerable<(string ProductName, int Quantity, decimal UnitPrice, decimal TotalPrice)>>
+        GetOrderDetailsAsync(int paymentId)
+        {
+            var result = new List<(string, int, decimal, decimal)>();
+
+            // 1. 先撈出所有明細，再過濾
+            var allDetails = await _uow
+                .Repository<TPaymentDetail>()
+                .GetAllAsync();  // <-- 假設有這個
+
+            var paymentDetails = allDetails
+                .Where(pd => pd.PaymentId == paymentId)
+                .ToList();
+
+            // 2. 依照 CompOrderId / EmpOrderId 拿訂單與課程
+            foreach (var pd in paymentDetails)
+            {
+                if (pd.CompOrderId.HasValue)
+                {
+                    var comp = await _uow.Repository<TCompOrder>()
+                        .GetByIdAsync(pd.CompOrderId.Value);
+                    var course = await _uow.Repository<TCourse>()
+                        .GetByIdAsync(comp.CourseId);
+
+                    decimal unit = comp.Amount.GetValueOrDefault(); ;
+                    int quantity = 1;
+                    result.Add((course.CourseTitle, quantity, unit, unit * quantity));
+                }
+                else if (pd.EmpOrderId.HasValue)
+                {
+                    var emp = await _uow.Repository<TEmpOrder>()
+                        .GetByIdAsync(pd.EmpOrderId.Value);
+                    var course = await _uow.Repository<TCourse>()
+                        .GetByIdAsync(emp.CourseId);
+
+                    decimal unit = emp.Amount.GetValueOrDefault(); ;
+                    int quantity = 1;
+                    result.Add((course.CourseTitle, quantity, unit, unit * quantity));
+                }
+            }
+
+            return result;
+        }
     }
 }

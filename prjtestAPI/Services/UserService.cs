@@ -371,5 +371,11 @@ namespace prjtestAPI.Services
 
             return users.Count;
         }
+
+        public async Task<TUser?> GetByIdAsync(int userId)
+        {
+            // 直接用泛型 Repository 的 GetByIdAsync
+            return await _uow.Repository<TUser>().GetByIdAsync(userId);
+        }
     }
 }

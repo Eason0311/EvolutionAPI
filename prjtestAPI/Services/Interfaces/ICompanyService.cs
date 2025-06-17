@@ -17,5 +17,6 @@ namespace prjEvolutionAPI.Services.Interfaces
         IDictionary<string, string> filters);
         Task<TCompany> CreateCompanyAsync(CompanyCreateDTO dto);
         Task<TCompany?> UpdateCompanyAsync(CompanyUpdateDTO dto);
+        Task<TCompany?> GetByIdAsync(int compId);
     }
 }

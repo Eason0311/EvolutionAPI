@@ -27,5 +27,6 @@ namespace prjtestAPI.Services.Interfaces
         Task<TUser?> UpdateEmployeeAsync(EmployeeUpdateDTO dto);
         Task<TUser?> UpdateStatusAsync(int userId);
         Task<int> UpdateStatusesBulkAsync(int[] userIds);
+        Task<TUser?> GetByIdAsync(int userId);
     }
 }

@@ -139,5 +139,11 @@ namespace prjEvolutionAPI.Services
 
             return entity;
         }
+
+        public async Task<TCompany?> GetByIdAsync(int compId)
+        {
+            // 直接呼叫 Repository 的 GetByIdAsync 方法
+            return await _uow.Company.GetByIdAsync(compId);
+        }
     }
 }

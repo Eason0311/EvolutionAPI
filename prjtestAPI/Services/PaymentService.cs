@@ -91,5 +91,12 @@ namespace prjEvolutionAPI.Services
             await _uow.CompleteAsync();
         }
 
+        public async Task<IEnumerable<TPaymentDetail>> GetPaymentDetailsAsync(int paymentId)
+        {
+            // 假設你的泛型 Repo 有 GetAllAsync()
+            var all = await _uow.Repository<TPaymentDetail>().GetAllAsync();
+            return all.Where(d => d.PaymentId == paymentId);
+        }
+
     }
 }
