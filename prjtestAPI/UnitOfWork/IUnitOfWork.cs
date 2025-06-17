@@ -21,6 +21,7 @@ public interface IUnitOfWork
     ICourseHashTagRepository CourseHashTags { get; }
     IHashTagListRepository HashTagLists { get; }
     ICourseAccessRepository CourseAccesses { get; }
+    ICourseBgListRepository CourseBgList { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

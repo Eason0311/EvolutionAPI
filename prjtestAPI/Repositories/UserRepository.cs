@@ -148,4 +148,10 @@ public class UserRepository : IUserRepository
                     .Where(u => u.CompanyId == adminCompanyId && depIds.Contains(u.UserDep))
                     .ToListAsync();
     }
+    public async Task<IEnumerable<TUser>> GetEmployeesByCompanyIdAsync(int companyId)
+    {
+        return await _context.TUsers
+            .Where(u => u.CompanyId == companyId && u.IsEmailConfirmed&&u.Role=="Employee")
+            .ToListAsync();
+    }
 }

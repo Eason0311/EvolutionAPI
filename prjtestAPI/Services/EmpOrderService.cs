@@ -36,7 +36,7 @@ namespace prjEvolutionAPI.Services
                     CompanyName = o.Course.Company.CompanyName!,
                     CourseDes = o.Course.CourseDes,
                     CourseTitle = o.Course.CourseTitle,
-                    CoverImagePath = $"{_baseUrl}/{o.Course.CoverImagePath.TrimStart('/')}"
+                    CoverImagePath = $"{_baseUrl}/images/{o.Course.CoverImagePath.TrimStart('/')}"
                 }).ToList();
 
             return dtoList;

@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly IVideoRepository _video;
     private readonly ICourseHashTagRepository _courseHashTag;
     private readonly ICourseAccessRepository _courseAccess;
+    private readonly ICourseBgListRepository _courseBgList;
 
     public UnitOfWork(
         EvolutionApiContext context,
@@ -39,7 +40,8 @@ public class UnitOfWork : IUnitOfWork
         IChapterRepository chapter,
         IVideoRepository video,
         ICourseHashTagRepository courseHashTag,
-        ICourseAccessRepository courseAccess
+        ICourseAccessRepository courseAccess,
+        ICourseBgListRepository courseBgList
         )
     {
         _context = context;
@@ -58,6 +60,7 @@ public class UnitOfWork : IUnitOfWork
         _courseAccess = courseAccess;
         _createCourse = createCourse;
         _chapter = chapter;
+        _courseBgList = courseBgList;
     }
 
     public IUserRepository Users => _users;
@@ -76,7 +79,7 @@ public class UnitOfWork : IUnitOfWork
     public ICourseHashTagRepository CourseHashTags => _courseHashTag;
     public IHashTagListRepository HashTagLists => _hashTagList;
     public ICourseAccessRepository CourseAccesses  => _courseAccess;
-
+    public ICourseBgListRepository CourseBgList => _courseBgList;
     public async Task<int> CompleteAsync()
     {
         return await _context.SaveChangesAsync();

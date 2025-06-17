@@ -25,5 +25,6 @@ namespace prjtestAPI.Repositories.Interfaces
        int companyId);
         Task<int> GetCompanyIdAsync(int userId);
         Task<IEnumerable<TUser>> GetUsersByDepartmentsAsync(int[] depIds,int userId);
+        Task<IEnumerable<TUser>> GetEmployeesByCompanyIdAsync(int companyId);
     }
 }

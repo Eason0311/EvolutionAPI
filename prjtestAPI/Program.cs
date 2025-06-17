@@ -89,7 +89,7 @@ builder.Services.AddScoped<ICourseHashTagService, SCourseHashTagService>();
 builder.Services.AddScoped<IDepListService, SDepListService>();
 builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>(); 
 builder.Services.AddScoped<IHashTagListService, SHashTagListService>();
-
+builder.Services.AddScoped<ICourseBgListService, SCourseBgListService>();
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -106,7 +106,7 @@ builder.Services.AddScoped<IVideoRepository, RVideoRepository>();
 builder.Services.AddScoped<ICourseHashTagRepository, RCourseHashTagRepository>();
 builder.Services.AddScoped<ICourseAccessRepository, RCourseAccessRepository>();
 builder.Services.AddScoped<ICreateCourseRepository, RCreateCourseRepository>();
-
+builder.Services.AddScoped<ICourseBgListRepository, RCourseBgListRepository>();
 
 // 8. JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
