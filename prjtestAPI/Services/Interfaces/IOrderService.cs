@@ -15,5 +15,6 @@ namespace prjEvolutionAPI.Services.Interfaces
         Task<int> CreateCompOrderAsync(TCompOrder order);
         Task<int> CreateEmpOrderAsync(TEmpOrder order);
         Task MarkOrdersPaidByPaymentIdAsync(int paymentId);
+        Task<int[]> GetUserOwnCourse(int userId);
     }
 }

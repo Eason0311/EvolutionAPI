@@ -10,10 +10,12 @@ namespace prjEvolutionAPI.Services
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IRepository<TEmpOrder> _empOrderRepo;
 
-        public OrderService(IUnitOfWork uow)
+        public OrderService(IUnitOfWork uow,IRepository<TEmpOrder> empOrderRepo)
         {
             _uow = uow;
+            _empOrderRepo = empOrderRepo;
         }
 
         public async Task<TCompOrder?> GetCompOrderByIdAsync(int compOrderId)
@@ -136,6 +138,15 @@ namespace prjEvolutionAPI.Services
                     await MarkOrderPaidAsync(detail.EmpOrderId.Value, isCompany: false);
                 }
             }
+        }
+
+        public async Task<int[]> GetUserOwnCourse(int userId)
+        {
+            var orders = await _uow.Repository<TEmpOrder>().GetWhereAsync(u => u.BuyerUserId == userId);
+
+            var courseIds = orders.Select(c => c.CourseId).ToArray();
+
+            return courseIds;
         }
     }
 }

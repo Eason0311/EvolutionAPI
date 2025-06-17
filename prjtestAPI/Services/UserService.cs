@@ -323,6 +323,7 @@ namespace prjtestAPI.Services
                 };
                 // 如果你的 Repository 支援 AddAsync，優先用 AddAsync
                 await _uow.DepList.AddAsync(department);
+                await _uow.CompleteAsync();
             }
 
             // 4. 更新使用者欄位
@@ -339,21 +340,36 @@ namespace prjtestAPI.Services
             return user;
         }
 
-        public async Task<TUser?> UpdateStatusAsync(int userId, string newStatus)
+        public async Task<TUser?> UpdateStatusAsync(int userId)
         {
-            // 1. 先撈到 user 本體
             var user = await _uow.Users.GetByIdAsync(userId);
             if (user == null) return null;
 
-            // 2. 更新狀態
-            user.UserStatus = newStatus;
+            user.UserStatus = "Inactive";
+            // EF Core 會自動偵測到 user 屬性改變
             await _uow.CompleteAsync();
 
-            // 3. 再去撈 department entity
-            var dep = await _uow.DepList.GetByIdAsync(user.UserDep);
-            user.UserDepNavigation = dep;   // 把 navigation property 塞回去
-
+            // 如果你需要回傳 navigation，確保 navigation property 已 Include
             return user;
+        }
+
+        public async Task<int> UpdateStatusesBulkAsync(int[] userIds)
+        {
+            // 把所有要停用的 user 一起撈出來
+            var users = await _uow.Repository<TUser>()
+                .GetWhereAsync(u => userIds.Contains(u.UserId));
+
+            // 若找不到任何人
+            if (!users.Any()) return 0;
+
+            // 一次把狀態都改成 Inactive
+            foreach (var u in users)
+                u.UserStatus = "Inactive";
+
+            // 一次儲存所有修改
+            await _uow.CompleteAsync();
+
+            return users.Count;
         }
     }
 }

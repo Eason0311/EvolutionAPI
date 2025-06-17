@@ -139,13 +139,15 @@ namespace prjEvolutionAPI.Controllers
 
         [HttpPatch("{id}/status")]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult<ApiResponse<EmployeesListDTO>>> UpdateStatus(int id,
+        public async Task<ActionResult<ApiResponse<EmployeesListDTO>>> UpdateStatus(
+    int id,
     [FromBody] EmployeeStatusUpdateDTO dto)
         {
             if (id != dto.UserId)
                 return BadRequest(ApiResponse<EmployeesListDTO>.FailResponse("路徑參數與 Payload 不符"));
 
-            var updated = await _userService.UpdateStatusAsync(dto.UserId, dto.UserStatus);
+            // 呼叫 Service 只把狀態改成 Inactive
+            var updated = await _userService.UpdateStatusAsync(id);
             if (updated == null)
                 return NotFound(ApiResponse<EmployeesListDTO>.FailResponse("找不到使用者"));
 
@@ -158,6 +160,20 @@ namespace prjEvolutionAPI.Controllers
                 UserStatus = updated.UserStatus
             };
             return Ok(ApiResponse<EmployeesListDTO>.SuccessResponse(resultDto));
+        }
+
+        [HttpPost("batch/status")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<ActionResult<ApiResponse<int>>> UpdateStatusesBulk(
+    [FromBody] int[] userIds)
+        {
+            if (userIds == null || userIds.Length == 0)
+                return BadRequest(ApiResponse<int>.FailResponse("未提供任何使用者 ID"));
+
+            // 呼叫 Service 回傳實際被停用的人數
+            var count = await _userService.UpdateStatusesBulkAsync(userIds);
+
+            return Ok(ApiResponse<int>.SuccessResponse(count));
         }
     }
 }

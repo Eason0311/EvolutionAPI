@@ -3,6 +3,5 @@
     public class EmployeeStatusUpdateDTO
     {
         public int UserId { get; set; }
-        public string UserStatus { get; set; }
     }
 }

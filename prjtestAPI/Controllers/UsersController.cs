@@ -35,6 +35,7 @@ namespace prjtestAPI.Controllers
         private readonly EvolutionApiContext _db;
         private readonly IEmpOrderService _empOrderService;
         private readonly ICompanyService _companyService;
+        private readonly IOrderService _orderService;
 
         public UsersController
         (
@@ -51,7 +52,8 @@ namespace prjtestAPI.Controllers
         IMailService mailService,
         EvolutionApiContext db,
         IEmpOrderService empOrderService,
-        ICompanyService companyService
+        ICompanyService companyService,
+        IOrderService orderService
         )
         {
             _jwtService = jwtService;
@@ -68,6 +70,7 @@ namespace prjtestAPI.Controllers
             _db = db;
             _empOrderService = empOrderService;
             _companyService = companyService;
+            _orderService = orderService;
         }
 
         [HttpGet("userinfo")]
@@ -216,6 +219,25 @@ namespace prjtestAPI.Controllers
 
             // 3. 如果 Service 正常回傳，則包裹成 SuccessResponse 並回傳 200 OK
             return Ok(ApiResponse<IEnumerable<DepListResponseDTO>>.SuccessResponse(deps));
+        }
+
+        [HttpGet("own-courses")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<int[]>>> OwnCourses()
+        {
+            int? checkUserId = User.GetUserId();
+            if (checkUserId == null)
+            {
+                return Unauthorized(ApiResponse<int[]>.FailResponse(
+                    "使用者識別錯誤，請重新登入。",
+                    null,
+                    401));
+            }
+            int userId = checkUserId.Value;
+
+            var courseIds = await _orderService.GetUserOwnCourse(userId);
+
+            return Ok(ApiResponse<int[]>.SuccessResponse(courseIds));
         }
     }
 }
