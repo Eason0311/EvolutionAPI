@@ -51,8 +51,7 @@ public class UnitOfWork : IUnitOfWork
         IRepository<TCompOrder> compOrders,
         IRepository<TEmpOrder> empOrders,
         IPaymentRepository payments,
-        IRepository<TPaymentDetail> paymentDetails
-        ICourseAccessRepository courseAccess,
+        IRepository<TPaymentDetail> paymentDetails,
         ICourseBgListRepository courseBgList
         )
     {
