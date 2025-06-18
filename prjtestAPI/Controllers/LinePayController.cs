@@ -135,25 +135,25 @@ namespace prjEvolutionAPI.Controllers
         {
             // 1. 驗證 transactionId
             if (!long.TryParse(transactionId, out long tid))
-                return BadRequest("交易編號格式錯誤");
+                return BadRequest($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 2. 驗證 orderId 格式 (EV-XXXXXXXX)
             if (!orderId.StartsWith("EV-") ||
                 !int.TryParse(orderId["EV-".Length..], out int paymentId))
             {
-                return BadRequest("無效的訂單編號");
+                return BadRequest($"http://localhost:4200/#/payment/fail?orderId={orderId}");
             }
 
             // 3. 取得 TPayment
             var payment = await _paymentSvc.GetByIdAsync(paymentId);
             if (payment == null)
-                return NotFound("找不到此付款紀錄");
+                return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 4. 呼叫 LINE Pay 確認付款
             decimal paidAmount = payment.Amount;
             var linePayResult = await _linePay.ConfirmPaymentAsync(transactionId, paidAmount);
             if (linePayResult.ReturnCode != "0000")
-                return Redirect($"{_opt.ConfirmUrl}/payment/fail?orderId={orderId}");
+                return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 5. 更新付款狀態
             await _paymentSvc.MarkPaymentAsPaidAsync(tid);
@@ -171,11 +171,11 @@ namespace prjEvolutionAPI.Controllers
             {
                 var compOrder = await _orderSvc.GetCompOrderByIdAsync(first.CompOrderId!.Value);
                 if (compOrder == null)
-                    return NotFound("找不到對應的公司訂單");
+                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 var comp = await _companyService.GetByIdAsync(compOrder.BuyerCompanyId);
                 if (comp == null)
-                    return NotFound("找不到對應的公司資料");
+                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 userEmail = comp.CompanyEmail;
                 displayName = compOrder.BuyerCompany.CompanyName;
@@ -184,11 +184,11 @@ namespace prjEvolutionAPI.Controllers
             {
                 var empOrder = await _orderSvc.GetEmpOrderByIdAsync(first.EmpOrderId!.Value);
                 if (empOrder == null)
-                    return NotFound("找不到對應的員工訂單");
+                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 var user = await _userService.GetByIdAsync(empOrder.BuyerUserId);
                 if (user == null)
-                    return NotFound("找不到對應的使用者");
+                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 userEmail = user.Email;
                 displayName = user.Username;
