@@ -26,6 +26,7 @@ public interface IUnitOfWork
     IPaymentRepository Payments { get; }
     IRepository<TPaymentDetail> PaymentDetails { get; }
     IRepository<TEntity> Repository<TEntity>() where TEntity : class;
+    ICourseBgListRepository CourseBgList { get; }
     Task<int> CompleteAsync();
     Task ExecuteTransactionAsync(Func<Task> action);
 }

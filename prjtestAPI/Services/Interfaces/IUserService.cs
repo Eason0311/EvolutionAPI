@@ -1,5 +1,6 @@
 ﻿using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.CompanyManage;
+using prjEvolutionAPI.Models.DTOs.CreateCourse;
 using prjEvolutionAPI.Models.DTOs.Publisher;
 using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Responses;
@@ -12,6 +13,7 @@ namespace prjtestAPI.Services.Interfaces
     public interface IUserService
     {
         Task<UserLoginResultDTO?> ValidateUserAsync(string email, string password);
+        Task<int> GetUserCompanyId(int userId);
         Task<UserInfoDTO> GetUserInfoAsync(int? userId);
         Task<ServiceResult<TUser>> CreateUserAsync(RegisterEmployeeDTO dto, int callerUserId);
         Task<EditUserResponseDTO?> EditUserInfoAsync(int userId, EditUserInfoDTO dto);
@@ -28,5 +30,6 @@ namespace prjtestAPI.Services.Interfaces
         Task<TUser?> UpdateStatusAsync(int userId);
         Task<int> UpdateStatusesBulkAsync(int[] userIds);
         Task<TUser?> GetByIdAsync(int userId);
+        
     }
 }

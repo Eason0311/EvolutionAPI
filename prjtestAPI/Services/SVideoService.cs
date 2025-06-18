@@ -149,16 +149,22 @@ namespace prjEvolutionAPI.Services
         {
             if (File.Exists(filePath))
             {
-                try
+                for (int i = 0; i < 3; i++) // 最多重試 3 次
                 {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    File.Delete(filePath);
-                }
-                catch (IOException)
-                {
-                    Thread.Sleep(200); // 稍作等待
-                    File.Delete(filePath);
+                    try
+                    {
+                        using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                        {
+                            fs.Close();
+                        }
+
+                        File.Delete(filePath);
+                        break; // 刪除成功就跳出
+                    }
+                    catch (IOException)
+                    {
+                        Thread.Sleep(200); // 等一下再試
+                    }
                 }
             }
         }

@@ -15,7 +15,6 @@ namespace prjEvolutionAPI.Services
         private readonly ICourseRepository _repo;
         private readonly IUnitOfWork _uow;
         private readonly IMemoryCache _cache;
-
         public CourseService(ICourseRepository repo, IUnitOfWork uow, IMemoryCache cache)
         {
             _repo = repo;
@@ -115,7 +114,7 @@ namespace prjEvolutionAPI.Services
             }
             try
             {
-                //course.IsDraft = finalDTO.IsDraft; // 更新課程狀態為草稿或已完成
+                course.IsDraft = finalDTO.IsDraft; // 更新課程狀態為草稿或已完成
                 this._uow.CreateCourse.Update(course);
                 await _uow.CompleteAsync();
                 return true;
@@ -151,7 +150,7 @@ namespace prjEvolutionAPI.Services
         }
 
         // 建立課程並回傳 CourseId
-        public async Task<int> CreateCourseAsync(VCourseDTO dto, string ConnectionId, IHubContext<CourseHub> hubContext)
+        public async Task<int> CreateCourseAsync(VCourseDTO dto, string ConnectionId,int CompanyId, IHubContext<CourseHub> hubContext)
         {
             await hubContext.Clients.Client(ConnectionId).SendAsync("ReceiveProgress", new ProgressUpdate
             {
@@ -169,13 +168,13 @@ namespace prjEvolutionAPI.Services
                 string newcoverImagePath = this.GetGuidFileName(dto.CoverImage);
                 var course = new TCourse
                 {
-                    CompanyId = (int)dto.CompanyId,
+                    CompanyId = CompanyId,
                     CourseTitle = dto.CourseTitle,
                     CourseDes = dto.CourseDes,
                     IsPublic = dto.IsPublic,
                     CoverImagePath = newcoverImagePath,
                     Price = dto.Price,
-                    //IsDraft = true,
+                    IsDraft = true,
                     //CreatedAt = DateTime.UtcNow
                 };
                 await hubContext.Clients.Client(ConnectionId).SendAsync("ReceiveProgress", new ProgressUpdate
@@ -308,6 +307,30 @@ namespace prjEvolutionAPI.Services
             _uow.CreateCourse.Delete(course);
             await _uow.CompleteAsync();
             return true;
+        }
+        public async Task<ResFinalCourse> GetCourseLearning(int courseId)
+        {
+            TCourse course = await _uow.CreateCourse.GetByIdAsync(courseId);
+            var chapters= await _uow.CreateCourse.GetChaptersWithVideosByCourseIdAsync(courseId);
+            ResFinalCourse resFinalCourse = new ResFinalCourse{
+                CourseTitle=course.CourseTitle,
+                CourseDes = course.CourseDes,
+                CoverImagePath = course.CoverImagePath,
+                Price = course.Price,
+                IsPublic = course.IsPublic,
+                chapterWithVideos = chapters.Select(c => new ResChapterWithVideo
+                {
+                    ChapterTitle = c.ChapterTitle,
+                    ChapterDes = c.ChapterDes,
+                    videos = c.TVideos.Select(v => new ResFinalVideo
+                    {
+                        VideoTitle = v.VideoTitle,
+                        VideoFile = v.VideoUrl
+                    }).ToList()
+                }).ToList()
+
+            };
+            return resFinalCourse;
         }
     }
 }

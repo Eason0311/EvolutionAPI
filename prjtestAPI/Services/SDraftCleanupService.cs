@@ -32,10 +32,9 @@ namespace prjEvolutionAPI.Services
                                                 .Include(c => c.TCourseChapters)
                                                     .ThenInclude(ch => ch.TVideos)
                                                 .Include(c => c.TCourseHashTags)
-                                                .Include(c => c.TCourseAccesses) // <<< 新增這一行
+                                                .Include(c => c.TCourseAccesses)
                                                 .Where(c => c.IsDraft)
                                                 .ToListAsync(stoppingToken);
-
 
                         if (draftCourses.Count > 0)
                         {
@@ -47,11 +46,7 @@ namespace prjEvolutionAPI.Services
                                 if (!string.IsNullOrEmpty(course.CoverImagePath))
                                 {
                                     var coverPath = Path.Combine(env.WebRootPath, "images", course.CoverImagePath);
-                                    if (File.Exists(coverPath))
-                                    {
-                                        File.Delete(coverPath);
-                                        _logger.LogInformation("已刪除封面圖：{Path}", coverPath);
-                                    }
+                                    SafeDeleteFile(coverPath);
                                 }
 
                                 // 刪除所有章節影片檔案（如有）
@@ -62,11 +57,7 @@ namespace prjEvolutionAPI.Services
                                         if (!string.IsNullOrEmpty(video.VideoUrl))
                                         {
                                             var videoPath = Path.Combine(env.WebRootPath, "videos", video.VideoUrl);
-                                            if (File.Exists(videoPath))
-                                            {
-                                                File.Delete(videoPath);
-                                                _logger.LogInformation("已刪除影片：{Path}", videoPath);
-                                            }
+                                            SafeDeleteFile(videoPath);
                                         }
                                     }
                                 }
@@ -95,5 +86,32 @@ namespace prjEvolutionAPI.Services
             _logger.LogInformation("草稿課程清理服務已停止");
         }
 
+        private void SafeDeleteFile(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return;
+
+            try
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                File.Delete(filePath);
+                _logger.LogInformation("已刪除檔案：{Path}", filePath);
+            }
+            catch (IOException ex)
+            {
+                _logger.LogWarning(ex, "檔案正在使用中，稍後重試：{Path}", filePath);
+                Thread.Sleep(500);
+                try
+                {
+                    File.Delete(filePath);
+                    _logger.LogInformation("第二次嘗試成功刪除檔案：{Path}", filePath);
+                }
+                catch (Exception retryEx)
+                {
+                    _logger.LogError(retryEx, "仍無法刪除檔案：{Path}", filePath);
+                }
+            }
+        }
     }
 }

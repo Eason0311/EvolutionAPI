@@ -138,10 +138,20 @@ public class UserRepository : IUserRepository
             return await _context.TUsers.Where(u => u.UserId == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<TUser>> GetUsersByDepartmentsAsync(int[] depIds)
+    public async Task<IEnumerable<TUser>> GetUsersByDepartmentsAsync(int[] depIds, int userId)
+    {
+        var adminCompanyId = await _context.TUsers
+                           .Where(u => u.UserId == userId)
+                           .Select(u => u.CompanyId)
+                           .FirstOrDefaultAsync(); // 改用 FirstOrDefault 直接取值 
+        return await _context.TUsers
+                    .Where(u => u.CompanyId == adminCompanyId && depIds.Contains(u.UserDep))
+                    .ToListAsync();
+    }
+    public async Task<IEnumerable<TUser>> GetEmployeesByCompanyIdAsync(int companyId)
     {
         return await _context.TUsers
-            .Where(u => depIds.Contains(u.UserDep))
+            .Where(u => u.CompanyId == companyId && u.IsEmailConfirmed&&u.Role=="Employee")
             .ToListAsync();
     }
 }

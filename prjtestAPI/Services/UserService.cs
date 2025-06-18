@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using prjEvolutionAPI.Models;
 using prjEvolutionAPI.Models.DTOs.Account;
 using prjEvolutionAPI.Models.DTOs.CompanyManage;
+using prjEvolutionAPI.Models.DTOs.CreateCourse;
 using prjEvolutionAPI.Models.DTOs.Publisher;
 using prjEvolutionAPI.Models.DTOs.User;
 using prjEvolutionAPI.Repositories.Interfaces;
@@ -76,7 +77,13 @@ namespace prjtestAPI.Services
                 User = user // 無論正確與否都回傳 user
             };
         }
-
+        public async Task<int> GetUserCompanyId(int userId)
+        {
+            TUser? user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+                return 0; // 或拋出例外，視你的需求而定
+            return user.CompanyId;
+        }
         public async Task<UserInfoDTO?> GetUserInfoAsync(int? userId)
         {
             if (userId == null)

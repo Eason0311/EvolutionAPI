@@ -29,6 +29,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<TEmpOrder> EmpOrders { get; }
     public IPaymentRepository Payments { get; }
     public IRepository<TPaymentDetail> PaymentDetails { get; }
+    private readonly ICourseBgListRepository _courseBgList;
 
     public UnitOfWork(
         EvolutionApiContext context,
@@ -51,6 +52,8 @@ public class UnitOfWork : IUnitOfWork
         IRepository<TEmpOrder> empOrders,
         IPaymentRepository payments,
         IRepository<TPaymentDetail> paymentDetails
+        ICourseAccessRepository courseAccess,
+        ICourseBgListRepository courseBgList
         )
     {
         _context = context;
@@ -73,6 +76,7 @@ public class UnitOfWork : IUnitOfWork
         EmpOrders = empOrders;
         Payments = payments;
         PaymentDetails = paymentDetails;
+        _courseBgList = courseBgList;
     }
 
     public IUserRepository Users => _users;
@@ -99,6 +103,7 @@ public class UnitOfWork : IUnitOfWork
             _repos[type] = new Repository<TEntity>(_context);
         return (IRepository<TEntity>)_repos[type];
     }
+    public ICourseBgListRepository CourseBgList => _courseBgList;
     public async Task<int> CompleteAsync()
     {
         return await _context.SaveChangesAsync();
