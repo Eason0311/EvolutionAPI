@@ -4,7 +4,7 @@ using prjEvolutionAPI.Repositories.Interfaces;
 
 namespace prjEvolutionAPI.Repositories
 {
-    public class EmpOrderRepository: IEmpOrderRepository
+    public class EmpOrderRepository : IEmpOrderRepository
     {
         private readonly EvolutionApiContext _context;
         public EmpOrderRepository(EvolutionApiContext context)

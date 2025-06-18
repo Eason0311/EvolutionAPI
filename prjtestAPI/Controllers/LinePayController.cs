@@ -135,19 +135,19 @@ namespace prjEvolutionAPI.Controllers
         {
             // 1. 驗證 transactionId
             if (!long.TryParse(transactionId, out long tid))
-                return BadRequest($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 2. 驗證 orderId 格式 (EV-XXXXXXXX)
             if (!orderId.StartsWith("EV-") ||
                 !int.TryParse(orderId["EV-".Length..], out int paymentId))
             {
-                return BadRequest($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
             }
 
             // 3. 取得 TPayment
             var payment = await _paymentSvc.GetByIdAsync(paymentId);
             if (payment == null)
-                return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 4. 呼叫 LINE Pay 確認付款
             decimal paidAmount = payment.Amount;
