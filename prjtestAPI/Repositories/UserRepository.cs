@@ -135,7 +135,7 @@ public class UserRepository : IUserRepository
 
     public async Task<int> GetCompanyIdAsync(int userId)
     {
-            return await _context.TUsers.Where(u => u.UserId == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
+        return await _context.TUsers.Where(u => u.UserId == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<TUser>> GetUsersByDepartmentsAsync(int[] depIds, int userId)
@@ -151,7 +151,7 @@ public class UserRepository : IUserRepository
     public async Task<IEnumerable<TUser>> GetEmployeesByCompanyIdAsync(int companyId)
     {
         return await _context.TUsers
-            .Where(u => u.CompanyId == companyId && u.IsEmailConfirmed&&u.Role=="Employee")
+            .Where(u => u.CompanyId == companyId && u.IsEmailConfirmed && u.Role == "User")
             .ToListAsync();
     }
 }

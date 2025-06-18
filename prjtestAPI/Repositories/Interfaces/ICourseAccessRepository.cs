@@ -9,5 +9,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TCourseAccess> AddCourseAsync(TCourseAccess courseAccess);
         Task<TCourseAccess> GetByIdAsync(int courseAccessId);
         Task Remove(TCourseAccess courseAccess);
+        Task<IEnumerable<TCourseAccess>> GetCourseAccessByUserIdAsync(int userId);
     }
 }

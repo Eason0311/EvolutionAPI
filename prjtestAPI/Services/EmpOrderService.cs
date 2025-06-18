@@ -5,7 +5,7 @@ using prjEvolutionAPI.Services.Interfaces;
 
 namespace prjEvolutionAPI.Services
 {
-    public class EmpOrderService: IEmpOrderService
+    public class EmpOrderService : IEmpOrderService
     {
         private readonly IUnitOfWork _uow;
         private readonly string _baseUrl;
@@ -25,8 +25,21 @@ namespace prjEvolutionAPI.Services
                 throw new KeyNotFoundException($"找不到 User (UserID = {userId})");
 
             var orders = await _uow.EmpOrder.GetByEmployeeIdAsync(userId);
-            if (orders == null || !orders.Any())
-                return new List<EmpOrderDTO>();
+            var courseAccess = await _uow.CourseAccesses.GetCourseAccessByUserIdAsync(userId);
+            //var courseWithAccess=await _uow.Course.GetCourseByArrCourseIds(
+            //    courseAccess.Select(ca => ca.CourseId).Distinct().ToList());
+            var dtoListAccess = courseAccess
+                .Where(a => a.Course != null && a.Course.Company != null)
+                .Select(a => new EmpOrderDTO
+                {
+                    CourseId = (int)a.CourseId,
+                    CompanyId = a.Course.CompanyId,
+                    CompanyName = a.Course.Company.CompanyName ?? "",
+                    CourseDes = a.Course.CourseDes ?? "",
+                    CourseTitle = a.Course.CourseTitle ?? "",
+                    CoverImagePath = $"{_baseUrl}/images/{a.Course.CoverImagePath?.TrimStart('/') ?? "noimage.png"}"
+                }).ToList();
+
 
             var dtoList = orders
                 .Select(o => new EmpOrderDTO
@@ -38,8 +51,14 @@ namespace prjEvolutionAPI.Services
                     CourseTitle = o.Course.CourseTitle,
                     CoverImagePath = $"{_baseUrl}/images/{o.Course.CoverImagePath.TrimStart('/')}"
                 }).ToList();
+            // 合併兩個清單並移除重複（以 CourseId 為基準）
+            var mergedList = dtoList
+                .UnionBy(dtoListAccess, x => x.CourseId)
+                .ToList();
+            if (mergedList == null)
+                return new List<EmpOrderDTO>();
 
-            return dtoList;
+            return mergedList;
         }
     }
 }

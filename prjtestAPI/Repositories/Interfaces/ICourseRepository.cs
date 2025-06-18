@@ -31,6 +31,5 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<List<string>> GetTitleSuggestionsAsync(string prefix, int maxResults = 10);
         Task<int> GetCourseCountAsync();
         Task<List<CourseWithTagDTO>> GetRandomCoursesAsync(int count = 9);
-        
     }
 }

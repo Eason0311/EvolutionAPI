@@ -44,9 +44,18 @@ namespace prjEvolutionAPI.Repositories
             if (courseAccess == null)
                 throw new ArgumentNullException(nameof(courseAccess), "Cannot remove null courseAccess entity.");
 
-             _context.Set<TCourseAccess>().Remove(courseAccess);
+            _context.Set<TCourseAccess>().Remove(courseAccess);
             // 此處不呼叫 SaveChangesAsync，統一由 UnitOfWork 控制交易
         }
-
+        public async Task<IEnumerable<TCourseAccess>> GetCourseAccessByUserIdAsync(int userId)
+        {
+            if (userId <= 0)
+                return Enumerable.Empty<TCourseAccess>();
+            return await _context.Set<TCourseAccess>()
+                .Include(ca => ca.Course) // 如果需要 Course 的詳細資訊
+                .Include(ca => ca.Course.Company) // 如果需要 Company 的詳細資訊
+                .Where(ca => ca.UserId == userId)
+                .ToListAsync();
+        }
     }
 }

@@ -199,11 +199,11 @@ namespace prjEvolutionAPI.Repositories
                                      CourseDes = c.CourseDes,
                                      IsPublic = c.IsPublic,
                                      CoverImagePath = $"{_baseUrl}/{c.CoverImagePath.TrimStart('/')}",
-                                     TagIds = c.TCourseHashTags.Select(t =>t.TagId).ToList()
+                                     TagIds = c.TCourseHashTags.Select(t => t.TagId).ToList()
                                  })
                                  .ToListAsync();
         }
 
-        
+
     }
 }
