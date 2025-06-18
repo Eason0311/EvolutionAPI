@@ -138,10 +138,12 @@ public partial class EvolutionApiContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.TCourseAccesses)
                 .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_tCourseAccess_tCourses");
 
             entity.HasOne(d => d.User).WithMany(p => p.TCourseAccesses)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_tCourseAccess_tUsers");
         });
 
@@ -184,7 +186,7 @@ public partial class EvolutionApiContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.TCourseChapters)
                 .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_tCourseChapters_tCourses");
         });
 
@@ -200,7 +202,7 @@ public partial class EvolutionApiContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.TCourseHashTags)
                 .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_tCourseHashTag_tCourses");
 
             entity.HasOne(d => d.Tag).WithMany(p => p.TCourseHashTags)
@@ -485,7 +487,7 @@ public partial class EvolutionApiContext : DbContext
 
             entity.HasOne(d => d.Chapter).WithMany(p => p.TVideos)
                 .HasForeignKey(d => d.ChapterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_tVideos_tCourseChapters");
         });
 
