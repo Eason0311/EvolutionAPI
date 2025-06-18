@@ -65,7 +65,7 @@ public partial class EvolutionApiContext : DbContext
     {
         modelBuilder.Entity<TCompOrder>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__tCompOrd__C3905BAF16403164");
+            entity.HasKey(e => e.OrderId).HasName("PK__tCompOrd__C3905BAFEF1CAC35");
 
             entity.ToTable("tCompOrders");
 
@@ -91,7 +91,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCompany>(entity =>
         {
-            entity.HasKey(e => e.CompanyId).HasName("PK__tCompani__2D971C4C6B2E8A23");
+            entity.HasKey(e => e.CompanyId).HasName("PK__tCompani__2D971C4CF517AA80");
 
             entity.ToTable("tCompanies");
 
@@ -107,7 +107,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourse>(entity =>
         {
-            entity.HasKey(e => e.CourseId).HasName("PK__tCourses__C92D71874F46D64D");
+            entity.HasKey(e => e.CourseId).HasName("PK__tCourses__C92D7187B7B9290A");
 
             entity.ToTable("tCourses");
 
@@ -128,7 +128,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseAccess>(entity =>
         {
-            entity.HasKey(e => e.CourseAccessId).HasName("PK__tCourseA__14EFAA2929CECC6F");
+            entity.HasKey(e => e.CourseAccessId).HasName("PK__tCourseA__14EFAA29CE9A8CBD");
 
             entity.ToTable("tCourseAccess");
 
@@ -147,7 +147,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseAssignment>(entity =>
         {
-            entity.HasKey(e => e.AssignmentId).HasName("PK__tCourseA__32499E572DC506E7");
+            entity.HasKey(e => e.AssignmentId).HasName("PK__tCourseA__32499E5760B5E1D7");
 
             entity.ToTable("tCourseAssignment");
 
@@ -174,7 +174,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseChapter>(entity =>
         {
-            entity.HasKey(e => e.ChapterId).HasName("PK__tCourseC__0893A34AEFF7A0DD");
+            entity.HasKey(e => e.ChapterId).HasName("PK__tCourseC__0893A34A75FEE52D");
 
             entity.ToTable("tCourseChapters");
 
@@ -190,7 +190,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TCourseHashTag>(entity =>
         {
-            entity.HasKey(e => e.CourseHashTagId).HasName("PK__tCourseH__53192E56809A803D");
+            entity.HasKey(e => e.CourseHashTagId).HasName("PK__tCourseH__53192E56A917B3FD");
 
             entity.ToTable("tCourseHashTag");
 
@@ -211,7 +211,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TDepList>(entity =>
         {
-            entity.HasKey(e => e.DepId).HasName("PK__tDepList__DB9CAA7F3ABCD411");
+            entity.HasKey(e => e.DepId).HasName("PK__tDepList__DB9CAA7FEA8A3F03");
 
             entity.ToTable("tDepList");
 
@@ -227,7 +227,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TEmpOrder>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__tEmpOrde__C3905BAF7B7F6CC2");
+            entity.HasKey(e => e.OrderId).HasName("PK__tEmpOrde__C3905BAFA4CFBC92");
 
             entity.ToTable("tEmpOrders");
 
@@ -253,7 +253,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<THashTagList>(entity =>
         {
-            entity.HasKey(e => e.TagId).HasName("PK__tHashTag__657CFA4CF06E5E6B");
+            entity.HasKey(e => e.TagId).HasName("PK__tHashTag__657CFA4C8B7B9F4D");
 
             entity.ToTable("tHashTagList");
 
@@ -263,7 +263,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TOption>(entity =>
         {
-            entity.HasKey(e => e.OptionId).HasName("PK__tOptions__92C7A1DF277BFC3C");
+            entity.HasKey(e => e.OptionId).HasName("PK__tOptions__92C7A1DFAA8AEC33");
 
             entity.ToTable("tOptions");
 
@@ -279,7 +279,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TPayment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__tPayment__9B556A58BDEACBE0");
+            entity.HasKey(e => e.PaymentId).HasName("PK__tPayment__9B556A588B46D1D2");
 
             entity.ToTable("tPayments");
 
@@ -294,7 +294,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TPaymentDetail>(entity =>
         {
-            entity.HasKey(e => e.DetailId).HasName("PK__tPayment__135C314D9E9C356B");
+            entity.HasKey(e => e.DetailId).HasName("PK__tPayment__135C314D465DC916");
 
             entity.ToTable("tPaymentDetails");
 
@@ -305,21 +305,21 @@ public partial class EvolutionApiContext : DbContext
 
             entity.HasOne(d => d.CompOrder).WithMany(p => p.TPaymentDetails)
                 .HasForeignKey(d => d.CompOrderId)
-                .HasConstraintName("FK__tPaymentD__CompO__00DF2177");
+                .HasConstraintName("FK__tPaymentD__CompO__19DFD96B");
 
             entity.HasOne(d => d.EmpOrder).WithMany(p => p.TPaymentDetails)
                 .HasForeignKey(d => d.EmpOrderId)
-                .HasConstraintName("FK__tPaymentD__EmpOr__01D345B0");
+                .HasConstraintName("FK__tPaymentD__EmpOr__1AD3FDA4");
 
             entity.HasOne(d => d.Payment).WithMany(p => p.TPaymentDetails)
                 .HasForeignKey(d => d.PaymentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__tPaymentD__Payme__7FEAFD3E");
+                .HasConstraintName("FK__tPaymentD__Payme__18EBB532");
         });
 
         modelBuilder.Entity<TQuestion>(entity =>
         {
-            entity.HasKey(e => e.QuestionId).HasName("PK__tQuestio__0DC06F8CB0FB2F76");
+            entity.HasKey(e => e.QuestionId).HasName("PK__tQuestio__0DC06F8CE4B90FC0");
 
             entity.ToTable("tQuestions");
 
@@ -334,7 +334,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuiz>(entity =>
         {
-            entity.HasKey(e => e.QuizId).HasName("PK__tQuizzes__8B42AE6E5B9624F8");
+            entity.HasKey(e => e.QuizId).HasName("PK__tQuizzes__8B42AE6E5FB1EF0F");
 
             entity.ToTable("tQuizzes");
 
@@ -350,7 +350,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuizAnswerDetail>(entity =>
         {
-            entity.HasKey(e => e.AnswerDetailId).HasName("PK__tQuizAns__F6D258130DE57B86");
+            entity.HasKey(e => e.AnswerDetailId).HasName("PK__tQuizAns__F6D258138D14CEAE");
 
             entity.ToTable("tQuizAnswerDetails");
 
@@ -377,7 +377,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TQuizResult>(entity =>
         {
-            entity.HasKey(e => e.ResultId).HasName("PK__tQuizRes__97690228E788BDDA");
+            entity.HasKey(e => e.ResultId).HasName("PK__tQuizRes__976902289DA46EDD");
 
             entity.ToTable("tQuizResults");
 
@@ -401,7 +401,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TRefreshToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__tRefresh__658FEEEAA6FEE6F7");
+            entity.HasKey(e => e.TokenId).HasName("PK__tRefresh__658FEEEA6A447A5E");
 
             entity.ToTable("tRefreshTokens");
 
@@ -425,7 +425,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TUser>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__tUsers__1788CCAC228FC348");
+            entity.HasKey(e => e.UserId).HasName("PK__tUsers__1788CCAC54D96325");
 
             entity.ToTable("tUsers");
 
@@ -455,7 +455,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TUserActionToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__tUserAct__658FEEEAFD9EFC6D");
+            entity.HasKey(e => e.TokenId).HasName("PK__tUserAct__658FEEEAA8AEA308");
 
             entity.ToTable("tUserActionTokens");
 
@@ -474,7 +474,7 @@ public partial class EvolutionApiContext : DbContext
 
         modelBuilder.Entity<TVideo>(entity =>
         {
-            entity.HasKey(e => e.VideoId).HasName("PK__tVideos__BAE5124A4A52CA88");
+            entity.HasKey(e => e.VideoId).HasName("PK__tVideos__BAE5124A849CF127");
 
             entity.ToTable("tVideos");
 
