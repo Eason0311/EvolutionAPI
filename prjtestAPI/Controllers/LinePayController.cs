@@ -171,11 +171,11 @@ namespace prjEvolutionAPI.Controllers
             {
                 var compOrder = await _orderSvc.GetCompOrderByIdAsync(first.CompOrderId!.Value);
                 if (compOrder == null)
-                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                    return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 var comp = await _companyService.GetByIdAsync(compOrder.BuyerCompanyId);
                 if (comp == null)
-                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                    return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 userEmail = comp.CompanyEmail;
                 displayName = compOrder.BuyerCompany.CompanyName;
@@ -184,11 +184,11 @@ namespace prjEvolutionAPI.Controllers
             {
                 var empOrder = await _orderSvc.GetEmpOrderByIdAsync(first.EmpOrderId!.Value);
                 if (empOrder == null)
-                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                    return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 var user = await _userService.GetByIdAsync(empOrder.BuyerUserId);
                 if (user == null)
-                    return NotFound($"http://localhost:4200/#/payment/fail?orderId={orderId}");
+                    return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
                 userEmail = user.Email;
                 displayName = user.Username;
