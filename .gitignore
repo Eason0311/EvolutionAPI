@@ -3,6 +3,18 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# 忽略 ffmpeg 可執行檔
+ffmpeg.exe
+ffprobe.exe
+
+# 忽略 videos 資料夾內容，但保留資料夾
+prjtestAPI/wwwroot/videos/*
+!prjtestAPI/wwwroot/videos/.gitkeep
+
+# 忽略 images 資料夾內容，但保留資料夾（如果你也想）
+
+!prjtestAPI/wwwroot/images/.gitkeep
+
 # User-specific files
 *.rsuser
 *.suo
