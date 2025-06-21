@@ -20,9 +20,11 @@ using prjEvolutionAPI.Models;
 using Microsoft.AspNetCore.Http.Features;
 using prjEvolutionAPI.Hubs;
 using prjEvolutionAPI.Models.DTOs.Account;
+using System.Net.Http.Headers;
+
 
 var builder = WebApplication.CreateBuilder(args);
-
+var config = builder.Configuration;
 // 1. 設定日誌
 builder.Services.AddLogging(logging =>
 {
@@ -98,6 +100,19 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ICourseAccessService, SCourseAccessService>(); 
 builder.Services.AddScoped<IHashTagListService, SHashTagListService>();
 builder.Services.AddScoped<ICourseBgListService, SCourseBgListService>();
+// 註冊先改為一般 Scoped
+builder.Services.AddScoped<IOpenAIService, SOpenAIService>();
+builder.Services.AddHttpClient("PaidOpenAI", client =>
+{    
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", config["OpenAI:ApiKey"]);
+});
+
+builder.Services.AddHttpClient("AssemblyAI", client =>
+{
+    client.BaseAddress = new Uri("https://api.assemblyai.com/v2/");
+    client.DefaultRequestHeaders.Add("Authorization", config["AssemblyAI:ApiKey"]);
+});
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

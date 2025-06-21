@@ -324,6 +324,7 @@ namespace prjEvolutionAPI.Services
                     ChapterDes = c.ChapterDes,
                     videos = c.TVideos.Select(v => new ResFinalVideo
                     {
+                        VideoId = v.VideoId,
                         VideoTitle = v.VideoTitle,
                         VideoFile = v.VideoUrl
                     }).ToList()
