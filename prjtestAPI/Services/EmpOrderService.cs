@@ -37,7 +37,7 @@ namespace prjEvolutionAPI.Services
                     CompanyName = a.Course.Company.CompanyName ?? "",
                     CourseDes = a.Course.CourseDes ?? "",
                     CourseTitle = a.Course.CourseTitle ?? "",
-                    CoverImagePath = $"{_baseUrl}/images/{a.Course.CoverImagePath?.TrimStart('/') ?? "noimage.png"}"
+                    CoverImagePath = $"{_baseUrl}/{a.Course.CoverImagePath?.TrimStart('/') ?? "noimage.png"}"
                 }).ToList();
 
 
@@ -49,7 +49,7 @@ namespace prjEvolutionAPI.Services
                     CompanyName = o.Course.Company.CompanyName!,
                     CourseDes = o.Course.CourseDes,
                     CourseTitle = o.Course.CourseTitle,
-                    CoverImagePath = $"{_baseUrl}/images/{o.Course.CoverImagePath.TrimStart('/')}"
+                    CoverImagePath = $"{_baseUrl}/{o.Course.CoverImagePath.TrimStart('/')}"
                 }).ToList();
             // 合併兩個清單並移除重複（以 CourseId 為基準）
             var mergedList = dtoList

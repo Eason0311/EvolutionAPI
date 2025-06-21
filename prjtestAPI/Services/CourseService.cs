@@ -172,7 +172,7 @@ namespace prjEvolutionAPI.Services
                     CourseTitle = dto.CourseTitle,
                     CourseDes = dto.CourseDes,
                     IsPublic = dto.IsPublic,
-                    CoverImagePath = newcoverImagePath,
+                    CoverImagePath = Path.Combine("images", newcoverImagePath).Replace("\\", "/"),
                     Price = dto.Price,
                     IsDraft = true,
                     //CreatedAt = DateTime.UtcNow
