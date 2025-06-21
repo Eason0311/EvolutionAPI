@@ -9,6 +9,6 @@ namespace prjEvolutionAPI.Repositories.Interfaces
         Task<TDepList?> GetByIdAsync(int UserDe);
         Task<IEnumerable<TDepList?>> GetByCompanyIdAsync(int companyId);
         Task AddAsync(TDepList depList);
-        Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync();
+        Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync(int companyId);
     }
 }

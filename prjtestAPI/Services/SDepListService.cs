@@ -10,9 +10,15 @@ namespace prjEvolutionAPI.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<IEnumerable<ResDepListDTO>> GetAllDepsAsync()
+        public async Task<IEnumerable<ResDepListDTO>> GetAllDepsAsync(int userId)
         {
-            return await _unitOfWork.DepList.GetAllDepartmentsAsync();
+            var company = await _unitOfWork.Company.GetByUserIdAsync(userId);
+            if (company == null)
+            {
+                throw new Exception("Company not found for the given user.");
+            }
+            var companyId = company.CompanyId;
+            return await _unitOfWork.DepList.GetAllDepartmentsAsync(companyId);
         }
     }
 }

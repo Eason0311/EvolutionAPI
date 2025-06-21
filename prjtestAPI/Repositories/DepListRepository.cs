@@ -36,10 +36,10 @@ namespace prjEvolutionAPI.Repositories
             await _context.TDepLists.AddAsync(depList);
         }
 
-        public async Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync()
+        public async Task<IEnumerable<ResDepListDTO>> GetAllDepartmentsAsync(int companyId)
         {
             var departments = await _context.TDepLists
-                            .Where(n => n.CompanyId == 2) // 篩選 CompanyID 為 2 的部門
+                            .Where(n => n.CompanyId == companyId) // 篩選 CompanyID 為 2 的部門
                             .OrderBy(n => n.DepId)        // 確保有固定順序，Skip 才有意義
                             .Skip(1)                      // 忽略第一筆資料
                             .Select(n => new ResDepListDTO
