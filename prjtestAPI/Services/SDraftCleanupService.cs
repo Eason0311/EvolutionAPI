@@ -45,7 +45,7 @@ namespace prjEvolutionAPI.Services
                                 // 刪除封面圖片（如有）
                                 if (!string.IsNullOrEmpty(course.CoverImagePath))
                                 {
-                                    var coverPath = Path.Combine(env.WebRootPath, "images", course.CoverImagePath);
+                                    var coverPath = Path.Combine(env.WebRootPath, course.CoverImagePath);
                                     SafeDeleteFile(coverPath);
                                 }
 

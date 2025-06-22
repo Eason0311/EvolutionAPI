@@ -4,6 +4,6 @@ namespace prjEvolutionAPI.Services.Interfaces
 {
     public interface IDepListService
     {
-        Task<IEnumerable<ResDepListDTO>> GetAllDepsAsync();
+        Task<IEnumerable<ResDepListDTO>> GetAllDepsAsync(int userId);
     }
 }

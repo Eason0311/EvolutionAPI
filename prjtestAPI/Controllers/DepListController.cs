@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using prjEvolutionAPI.Helpers;
 using prjEvolutionAPI.Models.DTOs.CreateCourse;
 using prjEvolutionAPI.Services.Interfaces;
+using System.Security.Claims;
 
 namespace prjEvolutionAPI.Controllers
 {
@@ -17,7 +19,13 @@ namespace prjEvolutionAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllDepartments()
         {
-            var departments = await _depListService.GetAllDepsAsync();
+            var userId = User.GetUserId();
+            if (userId==null)
+            {
+                return Unauthorized(ApiResponse<string>.FailResponse("未授權的使用者"));
+            }
+            var userIdInt = userId.Value;
+            var departments = await _depListService.GetAllDepsAsync(userIdInt);
             if (departments == null || !departments.Any())
             {
                 return NotFound("No departments found.");
