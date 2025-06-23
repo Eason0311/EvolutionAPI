@@ -52,79 +52,86 @@ namespace prjEvolutionAPI.Controllers
         public async Task<ActionResult<ApiResponse<LinePayRequestInfo>>> RequestPaymentAsync(
     [FromBody] List<CourseDTO> cartItems)
         {
-            int? checkUserId = User.GetUserId();
-            if (checkUserId == null)
+            try
             {
-                return Unauthorized(ApiResponse<LinePayRequestInfo>.FailResponse("使用者識別錯誤，請重新登入。", null, 401));
-            }
-
-            int userId = checkUserId.Value;
-            bool isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
-            int companyId = await _userService.GetUserCompanyIdAsync(userId);
-
-            int totalAmount = 0;
-            var orderDetails = new List<(int? compOrderId, int? empOrderId)>();
-
-            foreach (var item in cartItems)
-            {
-                totalAmount += item.Price;
-
-                if (isAdmin)
+                int? checkUserId = User.GetUserId();
+                if (checkUserId == null)
                 {
-                    var order = new TCompOrder
-                    {
-                        BuyerCompanyId = companyId,
-                        CourseId = item.CourseId,
-                        OrderDate = DateTime.UtcNow,
-                        Amount = item.Price,
-                        IsPaid = false,
-                    };
-                    int orderId = await _orderSvc.CreateCompOrderAsync(order);
-                    orderDetails.Add((compOrderId: orderId, empOrderId: null));
+                    return Unauthorized(ApiResponse<LinePayRequestInfo>.FailResponse("使用者識別錯誤，請重新登入。", null, 401));
                 }
-                else
+
+                int userId = checkUserId.Value;
+                bool isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+                int companyId = await _userService.GetUserCompanyIdAsync(userId);
+
+                int totalAmount = 0;
+                var orderDetails = new List<(int? compOrderId, int? empOrderId)>();
+
+                foreach (var item in cartItems)
                 {
-                    var order = new TEmpOrder
+                    totalAmount += item.Price;
+
+                    if (isAdmin)
                     {
-                        BuyerUserId = userId,
-                        CourseId = item.CourseId,
-                        OrderDate = DateTime.UtcNow,
-                        Amount = item.Price,
-                        IsPaid = false
-                    };
-                    int orderId = await _orderSvc.CreateEmpOrderAsync(order);
-                    orderDetails.Add((compOrderId: null, empOrderId: orderId));
+                        var order = new TCompOrder
+                        {
+                            BuyerCompanyId = companyId,
+                            CourseId = item.CourseId,
+                            OrderDate = DateTime.UtcNow,
+                            Amount = item.Price,
+                            IsPaid = false,
+                        };
+                        int orderId = await _orderSvc.CreateCompOrderAsync(order);
+                        orderDetails.Add((compOrderId: orderId, empOrderId: null));
+                    }
+                    else
+                    {
+                        var order = new TEmpOrder
+                        {
+                            BuyerUserId = userId,
+                            CourseId = item.CourseId,
+                            OrderDate = DateTime.UtcNow,
+                            Amount = item.Price,
+                            IsPaid = false
+                        };
+                        int orderId = await _orderSvc.CreateEmpOrderAsync(order);
+                        orderDetails.Add((compOrderId: null, empOrderId: orderId));
+                    }
                 }
+
+                int paymentId = await _paymentSvc.CreatePaymentAsync(
+                    totalAmount,
+                    status: "Pending",
+                    transactionId: null,
+                    details: orderDetails
+                );
+
+                string orderIdForLinePay = $"EV-{paymentId:D8}";
+
+                // ✅ 使用你從 user secret 取得的 _opt（已經在建構子中 .Value 過了）
+                string confirmUrl = $"{_opt.ConfirmUrl}?orderId={orderIdForLinePay}";
+                string cancelUrl = _opt.CancelUrl;
+
+                var linePayResponse = await _linePay.RequestPaymentAsync(
+                    amount: totalAmount,
+                    orderId: orderIdForLinePay,
+                    productName: "線上課程購買",
+                    confirmUrl: confirmUrl,
+                    cancelUrl: cancelUrl
+                );
+                await _paymentSvc.UpdateTransactionAsync(paymentId, linePayResponse.Info.TransactionId);
+
+                return Ok(ApiResponse<LinePayRequestInfo>.SuccessResponse(new LinePayRequestInfo
+                {
+                    PaymentId = paymentId,
+                    TransactionId = linePayResponse.Info.TransactionId,
+                    PaymentUrl = linePayResponse.Info.PaymentUrl
+                }));
             }
-
-            int paymentId = await _paymentSvc.CreatePaymentAsync(
-                totalAmount,
-                status: "Pending",
-                transactionId: null,
-                details: orderDetails
-            );
-
-            string orderIdForLinePay = $"EV-{paymentId:D8}";
-
-            // ✅ 使用你從 user secret 取得的 _opt（已經在建構子中 .Value 過了）
-            string confirmUrl = $"{_opt.ConfirmUrl}?orderId={orderIdForLinePay}";
-            string cancelUrl = _opt.CancelUrl;
-
-            var linePayResponse = await _linePay.RequestPaymentAsync(
-                amount: totalAmount,
-                orderId: orderIdForLinePay,
-                productName: "線上課程購買",
-                confirmUrl: confirmUrl,
-                cancelUrl: cancelUrl
-            );
-            await _paymentSvc.UpdateTransactionAsync(paymentId, linePayResponse.Info.TransactionId);
-
-            return Ok(ApiResponse<LinePayRequestInfo>.SuccessResponse(new LinePayRequestInfo
+            catch (Exception ex)
             {
-                PaymentId = paymentId,
-                TransactionId = linePayResponse.Info.TransactionId,
-                PaymentUrl = linePayResponse.Info.PaymentUrl
-            }));
+                return BadRequest(ApiResponse<LinePayRequestInfo>.FailResponse("伺服器內部錯誤，請稍後再試。", null, 500));
+            }
         }
 
         [AllowAnonymous]
