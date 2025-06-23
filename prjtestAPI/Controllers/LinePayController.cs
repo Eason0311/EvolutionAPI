@@ -106,7 +106,7 @@ namespace prjEvolutionAPI.Controllers
                     details: orderDetails
                 );
 
-                string orderIdForLinePay = $"EV-{paymentId:D8}";
+                string orderIdForLinePay = $"EV-{paymentId:D8}-{Guid.NewGuid():N}";
 
                 // 使用你從 user secret 取得的 _opt（已經在建構子中 .Value 過了）
                 string confirmUrl = $"{_opt.ConfirmUrl}?orderId={orderIdForLinePay}";
@@ -160,8 +160,9 @@ namespace prjEvolutionAPI.Controllers
                 return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
 
             // 2. 驗證 orderId 格式 (EV-XXXXXXXX)
-            if (!orderId.StartsWith("EV-") ||
-                !int.TryParse(orderId["EV-".Length..], out int paymentId))
+            if (!orderId.StartsWith("EV-")
+                || orderId.Length < 3 + 8   // 至少要有 "EV-" + 8 碼
+                || !int.TryParse(orderId.Substring(3, 8), out int paymentId))
             {
                 return Redirect($"http://localhost:4200/#/payment/fail?orderId={orderId}");
             }

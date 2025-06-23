@@ -34,11 +34,11 @@ namespace prjEvolutionAPI.Services
          *  1) 付款預約（RequestPaymentAsync）
          * --------------------------------------------------- */
         public async Task<LinePayRequestResponse> RequestPaymentAsync(
-     decimal amount,
-     string orderId,
-     string productName,
-     string confirmUrl,
-     string cancelUrl)
+         decimal amount,
+         string orderId,
+         string productName,
+         string confirmUrl,
+         string cancelUrl)
         {
             const string path = "/v3/payments/request";
 
@@ -50,16 +50,16 @@ namespace prjEvolutionAPI.Services
                 orderId,
                 packages = new[]
                 {
-            new
-            {
-                id       = orderId,
-                amount,
-                products = new[]
-                {
-                    new { name = productName, quantity = 1, price = amount }
-                }
-            }
-        },
+                    new
+                    {
+                        id = orderId,
+                        amount,
+                        products = new[]
+                        {
+                            new { name = productName, quantity = 1, price = amount }
+                        }
+                    }
+                },
                 redirectUrls = new { confirmUrl, cancelUrl }
             };
             var bodyJson = JsonSerializer.Serialize(bodyObj, _jsonOpts);
@@ -82,6 +82,15 @@ namespace prjEvolutionAPI.Services
             var resp = await CreateClient().ExecuteAsync(req);
             var result = JsonSerializer.Deserialize<LinePayRequestResponse>(resp.Content!, _jsonOpts)
                          ?? throw new InvalidOperationException($"LINE Pay Request 失敗: {resp.Content}");
+
+            if (result.ReturnCode != "0000")
+                throw new ApplicationException(
+                    $"LINE Pay 付款預約失敗 (Code={result.ReturnCode})：{result.ReturnMessage}");
+
+            if (result.Info == null)
+                throw new ApplicationException(
+                    $"LINE Pay 付款預約回傳缺少 Info，無法取得交易編號與付款網址。");
+
 
             return result;
         }
