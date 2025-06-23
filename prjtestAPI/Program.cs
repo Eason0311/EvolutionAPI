@@ -108,11 +108,6 @@ builder.Services.AddHttpClient("PaidOpenAI", client =>
         new AuthenticationHeaderValue("Bearer", config["OpenAI:ApiKey"]);
 });
 
-builder.Services.AddHttpClient("AssemblyAI", client =>
-{
-    client.BaseAddress = new Uri("https://api.assemblyai.com/v2/");
-    client.DefaultRequestHeaders.Add("Authorization", config["AssemblyAI:ApiKey"]);
-});
 // 7. 註冊各種 Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
