@@ -108,7 +108,7 @@ namespace prjEvolutionAPI.Controllers
 
                 string orderIdForLinePay = $"EV-{paymentId:D8}";
 
-                // ✅ 使用你從 user secret 取得的 _opt（已經在建構子中 .Value 過了）
+                // 使用你從 user secret 取得的 _opt（已經在建構子中 .Value 過了）
                 string confirmUrl = $"{_opt.ConfirmUrl}?orderId={orderIdForLinePay}";
                 string cancelUrl = _opt.CancelUrl;
 
@@ -119,6 +119,21 @@ namespace prjEvolutionAPI.Controllers
                     confirmUrl: confirmUrl,
                     cancelUrl: cancelUrl
                 );
+
+                if (linePayResponse.ReturnCode != "0000" || linePayResponse.Info == null)
+                {
+                    // 可以同時把 payment 狀態改成 Failed
+                    await _paymentSvc.UpdateStatusAsync(paymentId, "Failed");
+
+                    return BadRequest(
+                        ApiResponse<LinePayRequestInfo>.FailResponse(
+                            linePayResponse.ReturnMessage ?? "LINE Pay 付款預約失敗",
+                            null,
+                            400
+                        )
+                    );
+                }
+
                 await _paymentSvc.UpdateTransactionAsync(paymentId, linePayResponse.Info.TransactionId);
 
                 return Ok(ApiResponse<LinePayRequestInfo>.SuccessResponse(new LinePayRequestInfo
